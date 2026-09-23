@@ -1,0 +1,139 @@
+@import "tailwindcss";
+
+/* Paleta muestreada pixel a pixel de los mockups de beneficiario.
+   Espejo exacto de PuntosClub/constants/theme.ts — si cambia uno, cambia el
+   otro: los dos se usan (clases de Tailwind aca, `colors` en JS para los
+   iconos y los degrades, que no se pueden expresar con una clase). */
+@theme {
+  --color-bg: #FBFBFD;
+  --color-card: #FFFFFF;
+
+  --color-ink: #0A053D;      /* titulos */
+  --color-ink-soft: #5D5D75; /* bajadas */
+  --color-muted: #82849B;    /* labels */
+  --color-subtle: #7C7F8E;   /* metadatos de tarjetas */
+  --color-value: #474749;    /* valores de la ficha de cuenta */
+
+  --color-purple: #7638E7;
+  --color-purple-deep: #6536D2;
+  --color-purple-ink: #6F3EBE;
+  --color-purple-soft: #F5F1FF;
+  --color-purple-tint: #F6F2FE;
+
+  --color-pink: #CD2B74;
+  --color-pink-accent: #EC2E7B;
+  --color-pink-line: #F9CBDE;
+
+  --color-danger: #DA3845;
+  --color-danger-bg: #FDE7EA;
+
+  --color-line: #F1F1F5;
+  --color-chevron: #9CA0B5;
+
+  --color-violet: #6627F5;      /* valores de puntos */
+  --color-violet-soft: #F1E9FE; /* pastillas "Historial" / "Descuentos" */
+  --color-lilac: #F3EEFD;       /* tarjeta de ayuda, boton "Cargar mas" */
+  --color-lilac-row: #F6F2FB;   /* cabecera de fecha del historial */
+
+  --color-amber: #F59E0B;
+
+  --color-green: #0FA347;
+  --color-green-soft: #E7F6EA;
+  --color-green-line: #86DFA6;
+  --color-magenta: #F5056B;
+  --color-magenta-soft: #FDE3EC;
+
+  /* Panel de notificaciones (mockup 14/09/2026): mas lavados que
+     green-soft/magenta-soft, que ahi se usan para pastillas chicas. */
+  --color-notif-green: #EFF8F1;
+  --color-notif-pink: #FDF1F5;
+  --color-notif-lilac: #F5F2FD;
+
+  --color-slate: #6A6A96;      /* labels de fichas */
+  --color-slate-soft: #807FAA; /* subtitulos de filas */
+  --color-navy: #1A1A5A;       /* titulos de filas */
+
+  /* React Native usa la fuente del sistema; la web la copia para que los
+     anchos de texto del mockup no se corran. */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+/* La app movil no tiene modo oscuro: los mockups se disenaron sobre fondo
+   claro. Se fija el esquema para que el navegador no invierta los controles
+   nativos (inputs, checkbox, scrollbar). */
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* El movil no muestra barra de scroll sobre el contenido
+   (showsVerticalScrollIndicator={false} en casi todas las pantallas). */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Columna de contenido. En un telefono ocupa todo el ancho, identica a la app;
+   en una ventana grande se centra y para de crecer. El minmax(0, …) hace las
+   dos cosas sin un media query: si hay menos lugar que --page-w, la columna
+   vale lo que haya.
+   Se aplica al contenedor que scrollea de cada pantalla y a la fila interna de
+   la barra superior, para que el degrade de la barra siga yendo a sangre y
+   solo el contenido quede centrado. */
+.page-column {
+  display: grid;
+  grid-template-columns: minmax(0, var(--page-w, 1120px));
+  justify-content: center;
+  /* Sin esto las filas se estiran para llenar una ventana alta y vacia. */
+  align-content: start;
+  /* El contenedor que scrollea es un hijo flex: sin esto su `min-height: auto`
+     lo estira hasta el alto del contenido, la ventana entera pasa a scrollear
+     y la barra superior se va para arriba. */
+  min-height: 0;
+  /* Con alto definido, una grilla reparte el faltante achicando las filas
+     `auto` (los chips del historial quedaban a media altura y el selector de
+     periodo en cero). `max-content` las deja en su alto natural y el sobrante
+     se va al scroll, que es lo que se quiere. */
+  grid-auto-rows: max-content;
+}
+
+/* Centra el contenido a lo alto cuando sobra pantalla (el login en una ventana
+   de escritorio). El `safe` es lo que hace que sirva: si el contenido no entra
+   — un telefono apaisado, o el navegador con el zoom al 200% — vuelve solo a
+   alinear arriba, en vez de recortar la parte de arriba sin dejar scrollear. */
+.page-center {
+  align-content: safe center;
+}
+
+/* Formularios y documentos no se leen bien a 1120px: una linea de texto de ese
+   ancho obliga a barrer la cabeza de punta a punta. */
+.page-form {
+  --page-w: 560px;
+}
+.page-read {
+  --page-w: 760px;
+}
+
+/* Pressable de RN: opacidad al tocar. Se aplica en :active para que el
+   feedback exista en tactil, donde no hay hover. */
+.pressable {
+  transition: opacity 120ms ease;
+}
+.pressable:active {
+  opacity: 0.75;
+}

@@ -1,0 +1,18 @@
+{
+  "//": "Reglas desactivadas SOLO donde el diagnostico es correcto pero la decision es deliberada. Cada override dice por que. Todo lo demas se arregla en el codigo.",
+  "ignore": {
+    "files": ["__tests__/**", "coverage/**", ".next/**"],
+    "overrides": [
+      {
+        "//": "El proxy ya corta por sesion del lado del servidor. Este redirect depende de estado que solo existe en el cliente: la fila de `beneficiary` con rol final_user vive detras de RLS y la carga AuthContext. Un redirect de servidor no puede saberlo, y mientras carga la pantalla muestra el spinner, no la pantalla equivocada.",
+        "files": ["src/app/**/layout.tsx"],
+        "rules": ["react-doctor/nextjs-no-client-side-redirect"]
+      },
+      {
+        "//": "El equivalente en HTML seria <progress>, que dibuja una barra de progreso determinada. Aca no hay progreso que informar: es el ActivityIndicator de la app movil, un circulo girando, y role=progressbar es la forma accesible de anunciarlo.",
+        "files": ["src/components/ui/spinner.tsx"],
+        "rules": ["react-doctor/prefer-tag-over-role"]
+      }
+    ]
+  }
+}
