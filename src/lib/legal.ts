@@ -10,7 +10,7 @@
 // que queda guardada como constancia de aceptacion en beneficiary.
 
 export const TERMS_VERSION = '1.1';
-export const PRIVACY_VERSION = '1.0';
+export const PRIVACY_VERSION = '1.1';
 
 export const TERMS_TEXT = `PuntosClub
 Términos y Condiciones de Uso — Beneficiarios
@@ -215,8 +215,8 @@ Cuestiones deliberadamente pendientes de validación jurídica: jurisdicción co
 
 export const PRIVACY_TEXT = `PuntosClub
 Política de Privacidad
-Versión 1.0 — Borrador para revisión legal
-Fecha de vigencia: [PENDIENTE]
+Versión 1.1
+Fecha de vigencia: 24 de septiembre de 2026
 ## 1. Responsable del tratamiento
 Esta Política establece cómo ADAMANTIO SAS, CUIT 30-71680750-5, trata los datos personales de las personas que utilizan PuntosClub.
 PuntosClub es una plataforma tecnológica destinada a facilitar la relación entre organizaciones que administran programas de beneficios y las personas que participan de dichos programas.
@@ -228,6 +228,10 @@ Esta Política se refiere al tratamiento realizado por PuntosClub. Las Organizac
 Datos obligatorios de registro: nombre, apellido, DNI, fecha de nacimiento, correo electrónico y contraseña.
 Datos opcionales: teléfono y ubicación.
 La ubicación podrá proporcionarse durante el registro o agregarse posteriormente desde el perfil.
+Datos asociados al dispositivo y a los permisos que el Beneficiario otorgue:
+- Cámara: la aplicación utiliza la cámara únicamente para leer códigos QR. Las imágenes se procesan en el dispositivo; no se almacenan ni se transmiten a PuntosClub. La aplicación no graba audio.
+- Autenticación biométrica: si el Beneficiario la habilita, la verificación por huella o reconocimiento facial la realiza el sistema operativo del dispositivo. PuntosClub no recibe, no accede y no almacena datos biométricos.
+- Identificador de notificaciones: cuando el Beneficiario acepta recibir notificaciones, el dispositivo genera un identificador (token de notificación) que se conserva para poder enviarle avisos y se elimina cuando revoca el permiso o cierra la sesión.
 ## 4. ¿Para qué utilizamos estos datos?
 Administración de la cuenta: crear y administrar la cuenta, identificar al Beneficiario, permitir el acceso, recuperar el acceso y mantener la seguridad.
 Participación en programas: vincular al Beneficiario con los programas que elija, administrar sus puntos, registrar operaciones, administrar canjes, mostrar historial y permitir el funcionamiento de las funcionalidades del programa.
@@ -279,6 +283,7 @@ PuntosClub implementará medidas técnicas y organizativas razonables destinadas
 Las medidas podrán incluir controles de acceso, autenticación, gestión de permisos, seguridad de las comunicaciones y registros necesarios para proteger la plataforma.
 ## 19. Credenciales
 Las contraseñas y credenciales son personales. PuntosClub implementará medidas razonables para protegerlas. Los Beneficiarios deberán mantenerlas confidenciales.
+Cuando el Beneficiario habilita el desbloqueo biométrico, la verificación la realiza el sistema operativo del dispositivo y PuntosClub únicamente recibe su resultado.
 ## 20. Prevención del fraude
 PuntosClub podrá tratar información necesaria para detectar actividades sospechosas, investigar fraude, prevenir abusos, proteger la plataforma y a sus usuarios e investigar operaciones potencialmente fraudulentas.
 Cuando resulte necesario y legalmente procedente, determinada información podrá conservarse durante el período necesario para estas finalidades.
@@ -324,14 +329,18 @@ Las Organizaciones reciben únicamente la información necesaria para administra
 No podrán utilizar las herramientas para acceder a la base general de Beneficiarios.
 La determinación jurídica exacta del rol de cada Organización respecto del tratamiento de datos deberá ser validada antes de la publicación definitiva.
 ## 35. Terceros y proveedores
-Actualmente, PuntosClub no declara proveedores externos que procesen datos personales de Beneficiarios por cuenta de PuntosClub.
-Esta Política no identifica proveedores como encargados del tratamiento cuando dicha relación todavía no existe.
+PuntosClub se apoya en proveedores tecnológicos que tratan datos personales por su cuenta y conforme a sus instrucciones:
+- Supabase: infraestructura de base de datos, autenticación y almacenamiento, donde residen los datos de las cuentas y de los programas.
+- Expo: envío de notificaciones push y distribución de actualizaciones de la aplicación. Trata el identificador de notificaciones del dispositivo.
+- Google: cuando el Beneficiario utiliza el buscador de direcciones, el texto que escribe y la dirección que selecciona se consultan contra el servicio de Google para completar los datos de domicilio.
+Estos proveedores actúan como encargados del tratamiento y no disponen de los datos para finalidades propias.
 ## 36. Futuros proveedores
 PuntosClub podrá incorporar proveedores tecnológicos u otros terceros cuando sean necesarios para prestar, mantener, proteger o mejorar sus servicios.
 Antes de incorporar un proveedor que trate datos personales se evaluarán información procesada, finalidad, ubicación, seguridad, condiciones contractuales, rol jurídico, transferencias internacionales y garantías.
 ## 37. Transferencias internacionales
-Actualmente no declaramos transferencias internacionales de datos personales realizadas mediante proveedores externos.
-Si en el futuro PuntosClub realiza transferencias internacionales, serán evaluadas conforme a la normativa aplicable y se adoptarán las garantías correspondientes.
+Los proveedores indicados en la sección 35 tratan los datos fuera de la República Argentina, principalmente en los Estados Unidos de América.
+Esto implica una transferencia internacional de datos personales, realizada al solo efecto de prestar el servicio y sujeta a las condiciones contractuales acordadas con cada proveedor.
+Al utilizar PuntosClub el Beneficiario queda informado de esta circunstancia. Ante cualquier consulta puede escribir a dpo@puntosclub.com.ar.
 ## 38. Registro de bases de datos
 PuntosClub evaluará las obligaciones aplicables a sus bases de datos personales y realizará las inscripciones o actualizaciones que correspondan ante el Registro Nacional de Bases de Datos Personales.
 Este punto deberá ser validado por el abogado antes del lanzamiento.
@@ -346,23 +355,4 @@ Consultas generales: hola@puntosclub.com.ar
 Derechos relacionados con datos personales: dpo@puntosclub.com.ar
 ## 42. Autoridad de control
 La autoridad de aplicación en materia de protección de datos personales en Argentina es la Agencia de Acceso a la Información Pública (AAIP).
-El Beneficiario podrá recurrir a los mecanismos previstos por la normativa aplicable cuando considere que sus derechos no fueron atendidos adecuadamente.
-## Estado del documento
-V1.0 — Borrador para revisión legal.
-Esta Política está construida sobre las decisiones funcionales definidas para PuntosClub y deberá ser revisada por un abogado especializado en protección de datos, derecho del consumidor y servicios digitales antes de su publicación.
-## Puntos para validación legal
-- Quién es jurídicamente el responsable del tratamiento y qué rol tienen los Owners.
-- Si las bases de datos de PuntosClub deben inscribirse y cuáles.
-- Plazos concretos de conservación para cada categoría de datos.
-- Qué registros de aceptación pueden conservarse después de eliminar una cuenta.
-- Eliminación de puntos, historial y canjes ante una solicitud de supresión.
-- Tratamiento del DNI y justificación de su obligatoriedad.
-- Fecha de nacimiento obligatoria y tratamiento de menores.
-- Ubicación voluntaria y mapa de calor agregado.
-- Comunicaciones comerciales y push notifications.
-- Moderación mediante IA y tratamiento automatizado.
-- Relación jurídica entre PuntosClub y cada Owner respecto de los datos.
-- Seguridad e incidentes.
-- Futuros encargados/proveedores y transferencias internacionales.
-- Mecanismo y plazos para responder solicitudes de acceso, rectificación y supresión.`;
-
+El Beneficiario podrá recurrir a los mecanismos previstos por la normativa aplicable cuando considere que sus derechos no fueron atendidos adecuadamente.`;
