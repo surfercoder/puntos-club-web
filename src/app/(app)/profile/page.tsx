@@ -382,6 +382,27 @@ function ProfileForm({
     router.replace('/sign-in');
   };
 
+  // Google Play exige que una app que deja crear cuenta deje pedir la baja, y
+  // que el pedido se pueda hacer desde una URL publica sin tener la app. La
+  // pagina vive en el admin: el borrado es un pedido y no automatico porque
+  // `purchase.beneficiary_id` es NOT NULL y borrar la fila romperia las ventas
+  // de los comercios. Mismo flujo que el profile.tsx de la app movil.
+  const handleDeleteAccount = async () => {
+    const ok = await confirm({
+      title: t('deleteAccount.confirmTitle'),
+      message: t('deleteAccount.confirmBody'),
+      confirmText: t('deleteAccount.continue'),
+      cancelText: t('common.cancel'),
+      destructive: true,
+    });
+    if (!ok) return;
+    window.open(
+      `${env.NEXT_PUBLIC_SITE_URL}/legal/eliminar-cuenta`,
+      '_blank',
+      'noopener,noreferrer',
+    );
+  };
+
   return (
     <div className="flex min-h-dvh flex-1 flex-col bg-bg">
       <ScreenHeader width="form" title={t('profile.header')} />
@@ -430,6 +451,16 @@ function ProfileForm({
           <FiLogOut size={18} color="#D41E1F" />
           <span className="ml-2.5 text-[15.5px] font-bold text-[#D41E1F]">
             {t('signOut.action')}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          className="pressable mt-3.5 flex h-10 w-full items-center justify-center"
+          onClick={handleDeleteAccount}
+        >
+          <span className="text-[13.5px] font-semibold text-slate underline">
+            {t('deleteAccount.action')}
           </span>
         </button>
 

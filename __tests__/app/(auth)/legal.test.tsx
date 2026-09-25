@@ -1,5 +1,7 @@
 import { screen } from '@testing-library/react';
 
+import { translate } from '@/i18n';
+
 import { es, renderApp } from '../../_helpers/render';
 
 const params = new URLSearchParams();
@@ -56,7 +58,11 @@ describe('documentos legales', () => {
   // cuerpo queda en espanol y se antepone el aviso.
   it('en ingles avisa que el texto esta en espanol', () => {
     renderApp(<LegalPage />, { lang: 'en' });
-    expect(screen.getByText(es('legal.spanishOnly'))).toBeInTheDocument();
+    // El aviso es lo unico traducido de la pantalla: en ingles sale del
+    // diccionario ingles, no del espanol.
+    expect(
+      screen.getByText(translate('en', 'legal.spanishOnly')),
+    ).toBeInTheDocument();
   });
 
   it('en espanol no muestra ese aviso', () => {

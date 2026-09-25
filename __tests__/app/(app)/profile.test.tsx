@@ -373,3 +373,35 @@ describe('cerrar sesion', () => {
     expect(auth.signOut).not.toHaveBeenCalled();
   });
 });
+
+// Misma opcion que el profile.tsx de la app movil: la baja se pide en una
+// pagina publica del admin, no se borra la cuenta desde aca.
+describe('eliminar cuenta', () => {
+  const openSpy = () => jest.spyOn(window, 'open').mockReturnValue(null);
+
+  it('confirma y abre la pagina de baja del admin', async () => {
+    const open = openSpy();
+    show();
+    await userEvent.click(screen.getByText(es('deleteAccount.action')));
+
+    await waitFor(() =>
+      expect(open).toHaveBeenCalledWith(
+        'http://localhost:3001/legal/eliminar-cuenta',
+        '_blank',
+        'noopener,noreferrer',
+      ),
+    );
+    open.mockRestore();
+  });
+
+  it('si cancela no abre nada', async () => {
+    confirmMock.mockResolvedValue(false);
+    const open = openSpy();
+    show();
+    await userEvent.click(screen.getByText(es('deleteAccount.action')));
+
+    await waitFor(() => expect(confirmMock).toHaveBeenCalled());
+    expect(open).not.toHaveBeenCalled();
+    open.mockRestore();
+  });
+});

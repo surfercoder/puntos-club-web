@@ -189,7 +189,7 @@ export const es = {
   // Los documentos legales solo existen en español: una version inglesa no
   // revisada seria igual de vinculante y nadie la aprobo.
   'legal.spanishOnly':
-    'This document is available in Spanish only. Ask us for a certified translation if you need one.',
+    'Este documento está disponible solo en español. Pedinos una traducción certificada si necesitás una.',
 
   // --- Dirección -----------------------------------------------------------
   'address.street': 'Calle',
@@ -247,6 +247,12 @@ export const es = {
   'signOut.action': 'Cerrar sesión',
   'signOut.confirmTitle': 'Cerrar sesión',
   'signOut.confirmBody': '¿Estás seguro que deseas cerrar sesión?',
+
+  'deleteAccount.action': 'Eliminar mi cuenta',
+  'deleteAccount.confirmTitle': 'Eliminar mi cuenta',
+  'deleteAccount.confirmBody':
+    'Vas a perder tus puntos en todos los programas, tu participación en cada club y tu historial. No se puede deshacer.\n\nTe abrimos la página donde pedir la baja.',
+  'deleteAccount.continue': 'Continuar',
 
   // --- Explorar ------------------------------------------------------------
   'explore.title': 'Explorar',

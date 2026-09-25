@@ -244,6 +244,12 @@ export const en: Record<keyof typeof es, string> = {
   'signOut.confirmTitle': 'Sign out',
   'signOut.confirmBody': 'Are you sure you want to sign out?',
 
+  'deleteAccount.action': 'Delete my account',
+  'deleteAccount.confirmTitle': 'Delete my account',
+  'deleteAccount.confirmBody':
+    'You will lose your points in every program, your membership in each club and your history. This cannot be undone.\n\nWe will open the page where you can request deletion.',
+  'deleteAccount.continue': 'Continue',
+
   // --- Explore -------------------------------------------------------------
   'explore.title': 'Explore',
   'explore.scanQr': 'Scan QR',
