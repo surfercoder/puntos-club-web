@@ -52,7 +52,7 @@ Aplicá cada sugerencia de ambos. Si estás en desacuerdo con alguna, no la apli
 
 Proyecto de un solo dev: se pushea directo a `main`, sin branch ni PR.
 
-1. `git status` y `git diff` para revisar qué entra. Incluí el bloque de `AGENTS.md` si `next dev` lo regeneró.
+1. `git status` y `git diff` para revisar qué entra. Entra **todo** lo pendiente, también lo de sesiones anteriores: nunca stash ni archivos afuera (salvo secretos y artefactos de build). Incluí el bloque de `AGENTS.md` si `next dev` lo regeneró.
 2. `git add` de lo que corresponde (nada de secretos, `.env.local`, `coverage/`, ni artefactos de build). `.env.test` **sí** va: sin él la suite no corre en un clon limpio y sólo tiene valores de juguete.
 3. Commit con el mensaje de $ARGUMENTS, o uno propio que describa el *por qué* del cambio si no lo pasaron.
 4. `git push origin main`.
