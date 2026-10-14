@@ -380,6 +380,18 @@ describe('joinOrganization', () => {
     expect(error?.message).toBe('error.join.reactivateFailed');
   });
 
+  it('explica cuando el club llego al cupo de socios de su plan', async () => {
+    const result = await start();
+
+    db.queueTable(
+      'beneficiary_organization',
+      { data: null, error: { code: 'PGRST116' } },
+      { error: { code: 'P0001', message: 'PLAN_LIMIT_REACHED' } },
+    );
+    const { error } = await result.current.joinOrganization('9');
+    expect(error?.message).toBe('error.rpc.planLimitReached');
+  });
+
   it('avisa si falla el alta', async () => {
     const result = await start();
 

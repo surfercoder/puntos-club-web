@@ -29,6 +29,13 @@ const keyError = (key: MessageKey, params?: Record<string, string | number>) => 
   if (params) Object.assign(error, { i18nParams: params });
   return error;
 };
+// Al unirse sólo el cupo del plan merece explicación propia (el trigger
+// enforce_beneficiaries_limit); el resto sigue con el mensaje genérico.
+const joinError = (error: unknown, fallback: MessageKey) => {
+  const { key } = errorDescriptor(error);
+  return keyError(key === 'error.rpc.planLimitReached' ? key : fallback);
+};
+
 const mapped = (error: unknown) => {
   const { key, params } = errorDescriptor(error);
   return keyError(key, params);
@@ -538,7 +545,7 @@ function useOrganizationsLoader(beneficiaryId: string | undefined) {
           .eq('id', existing.id);
 
         if (updateError) {
-          return { error: keyError('error.join.reactivateFailed') };
+          return { error: joinError(updateError, 'error.join.reactivateFailed') };
         }
       } else {
         const { error: insertError } = await supabase
@@ -553,7 +560,7 @@ function useOrganizationsLoader(beneficiaryId: string | undefined) {
           });
 
         if (insertError) {
-          return { error: keyError('error.join.failed') };
+          return { error: joinError(insertError, 'error.join.failed') };
         }
       }
 

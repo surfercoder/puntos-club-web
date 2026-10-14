@@ -59,6 +59,7 @@ const RPC_TOKENS: [string, MessageKey][] = [
   ['INSUFFICIENT_POINTS', 'error.rpc.insufficientPoints'],
   ['OUT_OF_STOCK', 'error.rpc.outOfStock'],
   ['MEMBERSHIP_INACTIVE', 'error.rpc.membershipInactive'],
+  ['PLAN_LIMIT_REACHED', 'error.rpc.planLimitReached'],
   ['ALREADY_DELIVERED', 'error.rpc.alreadyDelivered'],
   ['NOT_FOUND', 'error.db.notFound'],
 ];

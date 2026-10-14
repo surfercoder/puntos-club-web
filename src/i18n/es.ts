@@ -68,6 +68,8 @@ export const es = {
 
   'error.rpc.insufficientPoints': 'No tenés puntos suficientes para este producto.',
   'error.rpc.outOfStock': 'Este producto se quedó sin stock.',
+  'error.rpc.planLimitReached':
+    'Este club alcanzó el cupo de socios de su plan. Probá más tarde.',
   'error.rpc.membershipInactive':
     'Tu membresía con esta organización no está activa.',
   'error.rpc.alreadyDelivered': 'Este canje ya fue entregado.',

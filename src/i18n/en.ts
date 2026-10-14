@@ -70,6 +70,8 @@ export const en: Record<keyof typeof es, string> = {
 
   'error.rpc.insufficientPoints': "You don't have enough points for this reward.",
   'error.rpc.outOfStock': 'This reward is out of stock.',
+  'error.rpc.planLimitReached':
+    'This club has reached its member limit. Please try again later.',
   'error.rpc.membershipInactive':
     'Your membership with this organization is not active.',
   'error.rpc.alreadyDelivered': 'This redemption was already delivered.',
