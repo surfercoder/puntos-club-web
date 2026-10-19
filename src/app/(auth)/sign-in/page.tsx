@@ -124,7 +124,7 @@ export default function SignInPage() {
         className="page-column page-form page-center no-scrollbar flex-1 overflow-y-auto pb-[calc(24px+env(safe-area-inset-bottom))]"
       >
         <Image
-          src="/images/auth/hero.png"
+          src="/images/auth/hero-v2.png"
           alt=""
           width={HERO_W}
           height={HERO_H}

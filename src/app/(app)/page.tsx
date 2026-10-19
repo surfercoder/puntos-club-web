@@ -44,8 +44,8 @@ const ORGS_MAX_HEIGHT = ORG_ROW * 4 + 16;
 // Al recorte se le devolvio arriba mascot-tip.png, la mitad de la bola de la
 // antena que en el mockup asomaba fuera de la card: adentro entra entera.
 const ART = {
-  logo: '/images/home/logo.png',
-  mascot: '/images/home/clubi.png',
+  logo: '/images/home/logo-regalo.png',
+  mascot: '/images/home/clubi-v2.png',
   pillStar: '/images/home/pill-star.png',
   store: '/images/home/store.png',
 };

@@ -31,7 +31,7 @@ import type { Organization } from '@/types';
 const HERO_BG =
   'radial-gradient(70% 90% at 88% 35%, #FDF1F7 0%, rgba(253,241,247,0) 65%),' +
   'linear-gradient(180deg, #ECE7F4 0%, #F5F1FC 28%, #F5F1FC 100%)';
-const HERO = { art: '/images/explore/clubi-lupa.png', w: 261, h: 236 };
+const HERO = { art: '/images/explore/clubi-lupa-v2.png', w: 261, h: 236 };
 
 export default function ExplorePage() {
   const router = useRouter();
