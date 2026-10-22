@@ -11,7 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useT } from '@/contexts/I18nContext';
 import type { Translate } from '@/i18n';
 import { useOrganizationProducts } from '@/lib/products';
-import { colors, formatPoints, matches, norm } from '@/lib/theme';
+import { accent, colors, formatPoints, matches, norm } from '@/lib/theme';
 import { cn } from '@/lib/utils';
 import type { Product } from '@/types';
 
@@ -243,7 +243,7 @@ function ProductsEmpty({
   if (products === null) {
     return (
       <div className={cn(CARD, 'flex items-center justify-center')}>
-        <Spinner size={20} color={colors.violet} />
+        <Spinner size={20} color={accent('violet')} />
         <span className="ml-2.5 text-[13px] text-slate">
           {t('products.loading')}
         </span>

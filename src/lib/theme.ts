@@ -71,6 +71,101 @@ export const PLACEHOLDER = '#868B9A';
 export const gradient = (stops: readonly string[], vertical = false) =>
   `linear-gradient(${vertical ? 'to bottom' : 'to right'}, ${stops.join(', ')})`;
 
+// --- Branding de la org (organization.brand_color) ---
+// El owner elige UN color de su logo en el admin; la paleta la armamos
+// nosotros desde ese color para que siempre combine. Solo pisa los tokens de
+// acento (los morados y rosas); tinta, grises, verde de "ganados" y fondos
+// quedan igual. Lo usan las pantallas de la org, no la home: ahi conviven
+// varios clubes.
+type Rgb = [number, number, number];
+
+const toRgb = (hex: string): Rgb =>
+  [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)) as Rgb;
+
+const toHex = (rgb: Rgb) =>
+  `#${rgb.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('').toUpperCase()}`;
+
+// t=0 deja el color, t=1 lo lleva entero a `to`.
+const mix = (rgb: Rgb, to: Rgb, t: number): Rgb =>
+  rgb.map((v, i) => v + (to[i] - v) * t) as Rgb;
+
+const WHITE: Rgb = [255, 255, 255];
+const BLACK: Rgb = [0, 0, 0];
+
+// Luminancia relativa de WCAG.
+const luminance = (rgb: Rgb) => {
+  const [r, g, b] = rgb.map((v) => {
+    const c = v / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+
+export const brandPalette = (seed: string | null | undefined) => {
+  if (!seed || !/^#[0-9A-Fa-f]{6}$/.test(seed)) return null;
+  // El acento lleva texto blanco encima (barra, botones, caja de puntos):
+  // se oscurece hasta 4.5:1. Un amarillo o un celeste claro salen mas
+  // profundos que el logo, pero legibles.
+  let p = toRgb(seed);
+  while (1.05 / (luminance(p) + 0.05) < 4.5) p = mix(p, BLACK, 0.05);
+
+  const main = toHex(p);
+  const soft = toHex(mix(p, WHITE, 0.9));
+  const softer = toHex(mix(p, WHITE, 0.94));
+  const grad = [toHex(mix(p, BLACK, 0.12)), main] as const;
+
+  return {
+    violet: main,
+    purple: main,
+    purpleDeep: main,
+    purpleInk: main,
+    magenta: main,
+    pink: main,
+    pinkAccent: main,
+    violetSoft: soft,
+    purpleSoft: soft,
+    magentaSoft: soft,
+    lilac: soft,
+    purpleTint: softer,
+    lilacRow: softer,
+    pinkLine: toHex(mix(p, WHITE, 0.7)),
+    brand: grad,
+    headerGrad: grad,
+    pinkGrad: grad,
+    pointsGrad: grad,
+  };
+};
+
+type BrandKey = keyof NonNullable<ReturnType<typeof brandPalette>>;
+const kebab = (key: string) => key.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
+
+// La paleta como variables CSS, en dos juegos: --color-* con el nombre que
+// usa @theme en globals.css (las clases de Tailwind leen esas y heredan
+// solas) y --brand-* para `accent`. Las --color-* siempre existen (las define
+// Tailwind en :root), asi que no sirven para caer al color de Puntos Club; las
+// --brand-* solo existen con marca. Las pone el layout de organization/[id]
+// sobre <html>, no sobre un div: el dialogo de confirmar vive en un portal.
+export const brandVars = (seed: string | null | undefined) =>
+  Object.fromEntries(
+    Object.entries(brandPalette(seed) ?? {}).flatMap(([key, value]) =>
+      typeof value === 'string'
+        ? [
+            [`--color-${kebab(key)}`, value],
+            [`--brand-${kebab(key)}`, value],
+          ]
+        : [[`--brand-${kebab(key)}`, gradient(value)]],
+    ),
+  );
+
+// Para lo que no puede ser una clase (iconos, degrades inline, spinners, hex
+// sueltos del mockup): el color de la marca si hay, `fallback` si no.
+export const accent = (key: BrandKey, fallback?: string) => {
+  const value = colors[key];
+  return `var(--brand-${kebab(key)}, ${
+    fallback ?? (typeof value === 'string' ? value : gradient(value))
+  })`;
+};
+
 // El mockup separa "3.500" con punto. En ingles el punto es separador decimal
 // ("3.500" se leeria como tres y medio), asi que ese idioma usa coma.
 export const formatPoints = (n: number) =>

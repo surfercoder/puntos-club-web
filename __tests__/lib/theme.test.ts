@@ -1,5 +1,8 @@
 import { setActiveLang } from '@/i18n';
 import {
+  accent,
+  brandPalette,
+  brandVars,
   formatDayMonth,
   formatLongDate,
   formatPoints,
@@ -85,5 +88,47 @@ describe('norm / matches', () => {
   it('busca por substring, no por igualdad', () => {
     expect(matches('Panaderia', 'pan')).toBe(true);
     expect(matches('Panaderia', 'pizza')).toBe(false);
+  });
+});
+
+describe('brandPalette', () => {
+  it('sin color valido no hay marca', () => {
+    expect(brandPalette(null)).toBeNull();
+    expect(brandPalette('red')).toBeNull();
+    expect(brandVars(undefined)).toEqual({});
+  });
+
+  it('un color que ya contrasta con blanco queda igual', () => {
+    const p = brandPalette('#D7141A')!;
+    expect(p.violet).toBe('#D7141A');
+    expect(p.magenta).toBe('#D7141A');
+    expect(p.violetSoft).toBe('#FBE8E8');
+    expect(p.headerGrad).toEqual(['#BD1217', '#D7141A']);
+  });
+
+  // Va texto blanco encima: un amarillo o un blanco se oscurecen hasta 4.5:1.
+  it('oscurece los colores claros', () => {
+    expect(brandPalette('#FFD400')!.violet).toBe('#8A7300');
+    expect(brandPalette('#FFFFFF')!.violet).toBe('#767676');
+  });
+
+  it('arma las vars de Tailwind y las de accent', () => {
+    const vars = brandVars('#D7141A');
+    expect(vars['--color-violet-soft']).toBe('#FBE8E8');
+    expect(vars['--brand-violet-soft']).toBe('#FBE8E8');
+    expect(vars['--brand-points-grad']).toBe(
+      'linear-gradient(to right, #BD1217, #D7141A)',
+    );
+    expect(vars['--color-points-grad']).toBeUndefined();
+  });
+});
+
+describe('accent', () => {
+  it('cae al color de Puntos Club, o al que se le pase', () => {
+    expect(accent('violet')).toBe('var(--brand-violet, #6627F5)');
+    expect(accent('violet', '#7F3FF7')).toBe('var(--brand-violet, #7F3FF7)');
+    expect(accent('pointsGrad')).toBe(
+      'var(--brand-points-grad, linear-gradient(to right, #7644EA, #EF458A))',
+    );
   });
 });

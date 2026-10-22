@@ -10,6 +10,7 @@ export type Organization = {
   website?: string | null;
   industry?: string | null;
   logo_url?: string | null;
+  brand_color?: string | null;
   creation_date: string;
 };
 

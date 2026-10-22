@@ -26,7 +26,7 @@ import { errorMessage } from '@/lib/errors';
 import { notify } from '@/lib/notify';
 import { useOrganizationProducts } from '@/lib/products';
 import { supabase } from '@/lib/supabase/client';
-import { colors, formatPoints, gradient } from '@/lib/theme';
+import { accent, colors, formatPoints } from '@/lib/theme';
 import { cn } from '@/lib/utils';
 import type {
   Address,
@@ -235,11 +235,11 @@ function OrgHeader({
           className="pressable mt-2.5 flex h-11 w-full items-center rounded-[22px] border border-pink-line bg-card px-4"
           onClick={onInfo}
         >
-          <IoInformationCircleOutline size={18} color={colors.magenta} />
+          <IoInformationCircleOutline size={18} color={accent('magenta')} />
           <span className="ml-2 flex-1 text-left text-[14.5px] font-bold text-magenta">
             {t('org.companyInfo')}
           </span>
-          <FiChevronRight size={18} color={colors.magenta} />
+          <FiChevronRight size={18} color={accent('magenta')} />
         </button>
       </div>
     </div>
@@ -332,14 +332,14 @@ function CompanyInfoModal({
 
           {loading ? (
             <div className="flex justify-center">
-              <Spinner size={20} color={colors.violet} />
+              <Spinner size={20} color={accent('violet')} />
             </div>
           ) : (
             (branches ?? []).map((branch) => (
               <div key={branch.id} className="mb-[14px] flex gap-2.5">
                 <IoLocationOutline
                   size={18}
-                  color={colors.violet}
+                  color={accent('violet')}
                   className="shrink-0"
                 />
                 <div className="min-w-0 flex-1">
@@ -359,7 +359,7 @@ function CompanyInfoModal({
 
           {contacts.map(({ Icon, key, value }) => (
             <div key={key} className="mb-[14px] flex gap-2.5">
-              <Icon size={18} color={colors.violet} className="shrink-0" />
+              <Icon size={18} color={accent('violet')} className="shrink-0" />
               <p className="min-w-0 flex-1 break-words text-[13.5px] leading-[19px] text-ink-soft">
                 {value}
               </p>
@@ -395,7 +395,7 @@ function PointsCard({ points, t }: { points: number; t: Translate }) {
     >
       <div
         className="absolute inset-0 overflow-hidden rounded-[22px]"
-        style={{ backgroundImage: gradient(colors.pointsGrad) }}
+        style={{ backgroundImage: accent('pointsGrad') }}
       />
       {/* El bloque de texto va centrado en el 57% izquierdo; el resto es
           mascota. */}
@@ -441,7 +441,7 @@ function StatsCard({
           className="pressable flex items-center rounded-xl bg-violet-soft px-[11px] py-[5px]"
           onClick={() => router.push(`/organization/${organizationId}/history`)}
         >
-          <IoTimeOutline size={14} color={colors.violet} />
+          <IoTimeOutline size={14} color={accent('violet')} />
           <span className="ml-[5px] text-[12.5px] font-bold text-violet">
             {t('org.history')}
           </span>
@@ -457,13 +457,13 @@ function StatsCard({
           },
           {
             key: 'redeemed',
-            color: colors.magenta,
+            color: accent('magenta'),
             value: membership.total_points_redeemed,
             label: 'org.pointsRedeemed',
           },
           {
             key: 'available',
-            color: colors.violet,
+            color: accent('violet'),
             value: membership.available_points,
             label: 'org.pointsAvailable',
           },
@@ -493,7 +493,7 @@ function OfferRow({ offer, t }: { offer: ActiveOffer; t: Translate }) {
     <div className="mt-3 flex">
       <span
         className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[13px] text-[18px]"
-        style={{ backgroundColor: offer.display_color || colors.violet }}
+        style={{ backgroundColor: offer.display_color || accent('violet') }}
       >
         {offer.display_icon || '🎉'}
       </span>
@@ -531,7 +531,7 @@ function ActiveOffersList({
   if (offers === null) {
     return (
       <div className={cn(CARD, 'flex items-center justify-center')}>
-        <Spinner size={20} color={colors.violet} />
+        <Spinner size={20} color={accent('violet')} />
         <span className="ml-2.5 text-[13px] text-slate">
           {t('org.loadingOffers')}
         </span>
@@ -669,7 +669,7 @@ function RewardsCard({
 
       {products === null ? (
         <div className="flex items-center justify-center py-[18px]">
-          <Spinner size={20} color={colors.violet} />
+          <Spinner size={20} color={accent('violet')} />
           <span className="ml-2.5 text-[13px] text-slate">
             {t('org.loadingRewards')}
           </span>
@@ -760,7 +760,7 @@ export default function OrganizationDetailPage() {
       <div className="flex min-h-dvh flex-1 flex-col bg-bg">
         <ScreenHeader title={t('org.loading')} />
         <div className="flex flex-1 items-center justify-center p-5">
-          <Spinner size={36} color={colors.violet} />
+          <Spinner size={36} color={accent('violet')} />
         </div>
       </div>
     );
@@ -864,15 +864,19 @@ export default function OrganizationDetailPage() {
         />
         <button
           type="button"
-          className="pressable mx-4 mt-[14px] flex h-[46px] w-[calc(100%-32px)] items-center justify-center rounded-2xl border border-[#FBD9E6] bg-[#FFF2F6] md:mx-auto md:w-[320px]"
+          className="pressable mx-4 mt-[14px] flex h-[46px] w-[calc(100%-32px)] items-center justify-center rounded-2xl border md:mx-auto md:w-[320px]"
+          style={{
+            borderColor: accent('pinkLine', '#FBD9E6'),
+            backgroundColor: accent('lilacRow', '#FFF2F6'),
+          }}
           onClick={handleUnfollow}
           disabled={unfollowLoading}
         >
           {unfollowLoading ? (
-            <Spinner size={18} color={colors.magenta} />
+            <Spinner size={18} color={accent('magenta')} />
           ) : (
             <>
-              <IoRemoveCircleOutline size={18} color={colors.magenta} />
+              <IoRemoveCircleOutline size={18} color={accent('magenta')} />
               <span className="ml-2 text-[14.5px] font-bold text-magenta">
                 {t('org.unfollow')}
               </span>

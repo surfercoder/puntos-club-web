@@ -5,7 +5,7 @@ import React from 'react';
 import { FiArrowLeft } from 'react-icons/fi';
 
 import { useT } from '@/contexts/I18nContext';
-import { colors, gradient } from '@/lib/theme';
+import { accent } from '@/lib/theme';
 import { cn } from '@/lib/utils';
 
 /** Ancho de la columna de contenido; tiene que coincidir con el de la pantalla
@@ -32,7 +32,7 @@ export default function ScreenHeader({
   return (
     <div
       className="shrink-0 overflow-hidden pt-[env(safe-area-inset-top)]"
-      style={{ backgroundImage: gradient(colors.headerGrad) }}
+      style={{ backgroundImage: accent('headerGrad') }}
     >
       {/* El degrade va a sangre; la fila se centra con el resto del contenido
           de la pantalla. */}

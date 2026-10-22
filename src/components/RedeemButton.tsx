@@ -10,9 +10,12 @@ import { confirm } from '@/lib/confirm';
 import { errorMessage } from '@/lib/errors';
 import { notify } from '@/lib/notify';
 import { supabase } from '@/lib/supabase/client';
-import { colors, formatPoints, gradient } from '@/lib/theme';
+import { accent, formatPoints } from '@/lib/theme';
 import type { Product } from '@/types';
 import { cn } from '@/lib/utils';
+
+// Texto e icono del boton cuando no alcanzan los puntos: un tinte de la marca.
+const MUTED = accent('pinkLine', '#B7A6DC');
 
 // Hace el canje y avisa el resultado. Vive fuera del componente porque no toca
 // estado de React (el spinner lo maneja quien llama) y sacarlo deja el boton
@@ -60,14 +63,15 @@ function RedeemButtonFace({
   return (
     <>
       {compact ? null : (
-        <IoGiftOutline size={16} color={canAfford ? '#FFFFFF' : '#B7A6DC'} />
+        <IoGiftOutline size={16} color={canAfford ? '#FFFFFF' : MUTED} />
       )}
       <span
         className={cn(
           'font-bold',
           compact ? 'ml-0 text-[13.5px]' : 'ml-2 text-[14px]',
-          canAfford ? 'text-white' : 'text-[#B7A6DC]',
+          canAfford && 'text-white',
         )}
+        style={canAfford ? undefined : { color: MUTED }}
       >
         {t(
           canAfford
@@ -142,10 +146,11 @@ export default function RedeemButton({
         // El mockup dibuja 22dp de alto; se sube por el minimo tactil.
         compact ? 'mt-[10px] h-[34px] rounded-[11px]' : 'mt-3 h-9',
         canRedeem && 'pressable',
-        !canAfford && 'bg-[#EBE0FC]',
       )}
       style={
-        canAfford ? { backgroundImage: gradient(colors.pinkGrad) } : undefined
+        canAfford
+          ? { backgroundImage: accent('pinkGrad') }
+          : { backgroundColor: accent('violetSoft', '#EBE0FC') }
       }
     >
       <RedeemButtonFace

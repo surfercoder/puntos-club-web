@@ -4,7 +4,7 @@ import { AlertDialog } from 'radix-ui';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { setConfirmHost, type Pending } from '@/lib/confirm';
-import { colors, gradient } from '@/lib/theme';
+import { accent, colors } from '@/lib/theme';
 import { cn } from '@/lib/utils';
 
 /** Host del dialogo. La API imperativa vive en `@/lib/confirm`. */
@@ -75,7 +75,7 @@ export function ConfirmHost() {
                 style={
                   pending?.destructive
                     ? { background: colors.danger }
-                    : { backgroundImage: gradient(colors.brand) }
+                    : { backgroundImage: accent('brand') }
                 }
               >
                 {pending?.confirmText}

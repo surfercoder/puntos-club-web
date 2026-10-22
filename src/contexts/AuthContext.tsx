@@ -365,6 +365,7 @@ async function loadUserOrganizations(
         website,
         industry,
         logo_url,
+        brand_color,
         creation_date
       )
     `,

@@ -18,6 +18,7 @@ import { useT } from '@/contexts/I18nContext';
 import type { MessageKey, Translate } from '@/i18n';
 import { supabase } from '@/lib/supabase/client';
 import {
+  accent,
   colors,
   formatLongDate,
   formatPoints,
@@ -28,7 +29,7 @@ import {
 import { cn } from '@/lib/utils';
 
 const PAGE_SIZE = 10;
-const CHIP_ON = '#7F3FF7';
+const CHIP_ON = accent('violet', '#7F3FF7');
 
 type ActivityKind = 'earned' | 'redeemed' | 'cancelled';
 
@@ -47,13 +48,13 @@ type Activity = {
 // Cada chip trae su color de reposo (lavanda / verde / rosa); el activo se
 // pinta morado solido, como en el mockup.
 const FILTERS = [
-  { key: 'all', label: 'history.filterAll', bg: '#F1E9FE', fg: '#6627F5' },
+  { key: 'all', label: 'history.filterAll', bg: accent('violetSoft'), fg: accent('violet') },
   { key: 'earned', label: 'history.filterEarned', bg: '#F0FAF2', fg: '#0FA347' },
   {
     key: 'redeemed',
     label: 'history.filterRedeemed',
-    bg: '#FEECF3',
-    fg: '#F5056B',
+    bg: accent('magentaSoft', '#FEECF3'),
+    fg: accent('magenta'),
   },
 ] as const satisfies readonly {
   key: string;
@@ -283,8 +284,8 @@ const TONE: Record<
 > = {
   earned: { fg: colors.green, bg: colors.greenSoft, letter: 'G', sign: '+ ' },
   redeemed: {
-    fg: colors.magenta,
-    bg: colors.magentaSoft,
+    fg: accent('magenta'),
+    bg: accent('magentaSoft'),
     letter: 'C',
     sign: '- ',
   },
@@ -338,13 +339,13 @@ function SummaryCard({
     { key: 'earned', color: colors.green, value: earned, label: 'org.pointsEarned' },
     {
       key: 'redeemed',
-      color: colors.magenta,
+      color: accent('magenta'),
       value: redeemed,
       label: 'org.pointsRedeemed',
     },
     {
       key: 'available',
-      color: colors.violet,
+      color: accent('violet'),
       value: available,
       label: 'org.pointsAvailable',
     },
@@ -452,9 +453,9 @@ function SearchPanel({
           onClick={onOldestFirst}
         >
           {oldestFirst ? (
-            <FiArrowUp size={14} color={colors.violet} />
+            <FiArrowUp size={14} color={accent('violet')} />
           ) : (
-            <FiArrowDown size={14} color={colors.violet} />
+            <FiArrowDown size={14} color={accent('violet')} />
           )}
           <span className="text-[12.5px] font-bold text-violet">
             {t(oldestFirst ? 'history.sortOldest' : 'history.sortNewest')}
@@ -542,7 +543,7 @@ function ActivityFeed({
   if (loading) {
     return (
       <div className="mt-6 flex justify-center">
-        <Spinner size={20} color={colors.violet} />
+        <Spinner size={20} color={accent('violet')} />
       </div>
     );
   }
@@ -596,7 +597,7 @@ function ActivityFeed({
           <span className="text-[15px] font-bold text-violet">
             {t('history.loadMore')}
           </span>
-          <FiChevronDown size={18} color={colors.violet} />
+          <FiChevronDown size={18} color={accent('violet')} />
         </button>
       ) : null}
     </>
