@@ -10,7 +10,7 @@ export default function manifest(): MetadataRoute.Manifest {
       'Sumá puntos en los comercios que elegís y canjealos por premios.',
     start_url: '/',
     display: 'standalone',
-    background_color: '#FBFBFD',
+    background_color: '#F9F1F8',
     theme_color: '#7539F9',
     icons: [{ src: '/images/icon-v2.png', sizes: '512x512', type: 'image/png' }],
   };

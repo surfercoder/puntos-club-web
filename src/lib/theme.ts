@@ -4,7 +4,7 @@ import { getActiveLang } from '@/i18n';
 // donde el color no puede ser una clase de Tailwind: el `color` de un icono de
 // react-icons, un degrade inline, el atributo de un <svg>.
 export const colors = {
-  bg: '#FBFBFD',
+  bg: '#F9F1F8', // rosado: con #FBFBFD las tarjetas blancas no se despegaban
   card: '#FFFFFF',
 
   ink: '#0A053D',

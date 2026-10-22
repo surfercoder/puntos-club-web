@@ -5,7 +5,7 @@
    otro: los dos se usan (clases de Tailwind aca, `colors` en JS para los
    iconos y los degrades, que no se pueden expresar con una clase). */
 @theme {
-  --color-bg: #FBFBFD;
+  --color-bg: #F9F1F8;
   --color-card: #FFFFFF;
 
   --color-ink: #0A053D;      /* titulos */
