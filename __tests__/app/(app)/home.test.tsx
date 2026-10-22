@@ -2,7 +2,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { auth, beneficiary, membership, resetAuth } from '../../_helpers/auth';
-import { es, esFlat, renderApp } from '../../_helpers/render';
+import { es, renderApp } from '../../_helpers/render';
 import { confirmMock, notify } from '../../_helpers/ui';
 
 const router = { push: jest.fn(), replace: jest.fn(), back: jest.fn() };
@@ -261,15 +261,6 @@ describe('atajos', () => {
     show();
     await userEvent.click(screen.getByText(es('home.editProfile')));
     expect(router.push).toHaveBeenCalledWith('/profile');
-  });
-
-  // Se dibujan como en el mockup pero no fingen ser tocables: no tienen destino.
-  it('los accesos rapidos todavia no navegan', () => {
-    show();
-    expect(screen.getByText(esFlat('home.quick.earn'))).toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', { name: esFlat('home.quick.earn') }),
-    ).not.toBeInTheDocument();
   });
 });
 

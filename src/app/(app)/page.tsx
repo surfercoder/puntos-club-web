@@ -18,7 +18,7 @@ import TabBar from '@/components/TabBar';
 import { Spinner } from '@/components/ui/spinner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useT } from '@/contexts/I18nContext';
-import type { MessageKey, Translate } from '@/i18n';
+import type { Translate } from '@/i18n';
 import {
   getClearedAt,
   getSeenAt,
@@ -54,26 +54,6 @@ const ART = {
 // la derecha). La mascota ya trae la antena: no sobresale de la card.
 const HERO_BG =
   'linear-gradient(105deg, #EDE7FC 0%, #F3E3F4 55%, #FBDEE7 100%)';
-
-const QUICK_ACTIONS: { key: string; label: MessageKey; art: string }[] = [
-  { key: 'acumulo', label: 'home.quick.earn', art: '/images/home/qa-star.png' },
-  {
-    key: 'canjeo',
-    label: 'home.quick.redeem',
-    art: '/images/home/qa-gift.png',
-  },
-  {
-    key: 'promos',
-    label: 'home.quick.promos',
-    art: '/images/home/qa-promo.png',
-  },
-  { key: 'ayuda', label: 'home.quick.help', art: '/images/home/qa-help.png' },
-  {
-    key: 'novedades',
-    label: 'home.quick.news',
-    art: '/images/home/qa-news.png',
-  },
-];
 
 // Los nombres guardados suelen traer espacios de mas ("Carlos "), que se veian
 // como "Carlos  Schmidt" en la ficha de cuenta. Se colapsan aca, una vez.
@@ -644,30 +624,6 @@ export default function HomePage() {
             </span>
             <FiChevronRight size={16} color="#FFFFFF" />
           </button>
-        </div>
-
-        {/* Accesos rapidos */}
-        <SectionHeader title={t('home.quickActions')} />
-        <div className="flex gap-2 px-4">
-          {/* Sin pantalla destino todavia: se dibujan como en el mockup pero no
-              fingen ser tocables. Se vuelven botones cuando tengan ruta. */}
-          {QUICK_ACTIONS.map((qa) => (
-            <div
-              key={qa.key}
-              className="flex flex-1 flex-col items-center rounded-2xl bg-card py-2 shadow-[0px_3px_10px_rgba(23,10,60,0.05)]"
-            >
-              <Image
-                src={qa.art}
-                alt=""
-                width={36}
-                height={36}
-                className="h-9 w-9 object-contain"
-              />
-              <span className="mt-1.5 text-center text-[9.5px] leading-[13px] text-[#4E4D52]">
-                {t(qa.label)}
-              </span>
-            </div>
-          ))}
         </div>
 
         <AccountCard
