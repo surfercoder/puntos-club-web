@@ -2,11 +2,12 @@
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   IoBulb,
   IoChevronForward,
   IoCloseCircle,
+  IoNavigate,
   IoQrCode,
   IoQrCodeOutline,
   IoSearch,
@@ -17,9 +18,20 @@ import TabBar from '@/components/TabBar';
 import { Spinner } from '@/components/ui/spinner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useT } from '@/contexts/I18nContext';
+import type { Translate } from '@/i18n';
 import { confirm } from '@/lib/confirm';
 import { errorMessage } from '@/lib/errors';
+import {
+  nearestPlace,
+  orgIdsIn,
+  pickPlace,
+  placeOptions,
+  type OrgLocation,
+  type PlaceFilter,
+  type PlaceLevel,
+} from '@/lib/locations';
 import { notify } from '@/lib/notify';
+import { supabase } from '@/lib/supabase/client';
 import { colors, gradient, matches, norm } from '@/lib/theme';
 import { cn } from '@/lib/utils';
 import type { Organization } from '@/types';
@@ -33,6 +45,144 @@ const HERO_BG =
   'linear-gradient(180deg, #ECE7F4 0%, #F5F1FC 28%, #F5F1FC 100%)';
 const HERO = { art: '/images/explore/clubi-lupa-v2.png', w: 261, h: 236 };
 
+// Sin ubicaciones (RPC caida o ninguna sucursal cargada) el filtro no se
+// muestra y la lista queda como antes.
+async function loadLocations(): Promise<OrgLocation[]> {
+  try {
+    const { data, error } = await supabase.rpc('explore_org_locations');
+    if (error || !data) return [];
+    return data as OrgLocation[];
+  } catch {
+    return [];
+  }
+}
+
+// getCurrentPosition con callbacks, envuelto para poder esperarlo.
+const currentPosition = () =>
+  new Promise<GeolocationPosition>((resolve, reject) =>
+    navigator.geolocation.getCurrentPosition(resolve, reject),
+  );
+
+type NearResult = PlaceFilter | 'explore.nearDenied' | 'explore.nearFailed' | 'explore.nearNone';
+
+// "Cerca de mí" no filtra por radio: resuelve la provincia de la sucursal mas
+// cercana. Devuelve la clave del aviso cuando no puede; el componente queda
+// sin try/finally, que React Compiler no soporta.
+async function locateProvince(locations: OrgLocation[]): Promise<NearResult> {
+  let coords: GeolocationCoordinates;
+  try {
+    ({ coords } = await currentPosition());
+  } catch (error) {
+    // code 1 = PERMISSION_DENIED; lo demas es timeout o sin señal.
+    return (error as GeolocationPositionError).code === 1
+      ? 'explore.nearDenied'
+      : 'explore.nearFailed';
+  }
+  return nearestPlace(locations, coords.latitude, coords.longitude) ?? 'explore.nearNone';
+}
+
+// Una fila por nivel: la de provincias aparece al elegir pais y la de
+// departamentos al elegir provincia. "Cerca de mí" deja elegida la provincia
+// detectada, como si la hubiera tocado.
+function PlaceChips({
+  locations,
+  place,
+  near,
+  onChange,
+  t,
+}: {
+  locations: OrgLocation[];
+  place: PlaceFilter;
+  near: boolean;
+  onChange: (place: PlaceFilter, near: boolean) => void;
+  t: Translate;
+}) {
+  const [locating, setLocating] = useState(false);
+
+  const handleNear = async () => {
+    if (near) {
+      onChange({}, false);
+      return;
+    }
+    setLocating(true);
+    const found = await locateProvince(locations);
+    setLocating(false);
+    if (typeof found === 'string') {
+      notify.error(t('explore.near'), { description: t(found) });
+      return;
+    }
+    onChange(found, true);
+  };
+
+  const chip = (
+    key: string,
+    label: string,
+    on: boolean,
+    onClick: () => void,
+    icon?: React.ReactNode,
+  ) => (
+    <button
+      key={key}
+      type="button"
+      aria-pressed={on}
+      // Mientras ubica, un toque manual lo pisaria el resultado de la ubicacion.
+      disabled={locating}
+      className={cn(
+        'pressable flex h-[38px] shrink-0 items-center gap-1.5 rounded-[14px] px-[14px] shadow-[0px_3px_10px_rgba(23,10,60,0.05)]',
+        on ? 'bg-violet' : 'bg-card',
+      )}
+      onClick={onClick}
+    >
+      {icon}
+      <span
+        className={cn(
+          'whitespace-nowrap text-[13.5px] font-bold',
+          on ? 'text-white' : 'text-ink',
+        )}
+      >
+        {label}
+      </span>
+    </button>
+  );
+
+  const row = (level: PlaceLevel, lead?: React.ReactNode) => (
+    <div key={level} className="no-scrollbar flex gap-2 overflow-x-auto px-4 pt-3">
+      {lead}
+      {placeOptions(locations, place, level).map((option) =>
+        chip(option.key, option.label, place[level] === option.key, () =>
+          onChange(pickPlace(place, level, option.key), false),
+        ),
+      )}
+    </div>
+  );
+
+  return (
+    <div role="group" aria-label={t('explore.placeFilter')}>
+      {row(
+        'country',
+        <>
+          {chip(
+            'near',
+            t('explore.near'),
+            near,
+            handleNear,
+            locating ? (
+              <Spinner size={14} color={colors.violet} />
+            ) : (
+              <IoNavigate size={14} color={near ? '#FFFFFF' : colors.violet} />
+            ),
+          )}
+          {chip('all', t('explore.allPlaces'), !Object.values(place).some(Boolean), () =>
+            onChange({}, false),
+          )}
+        </>,
+      )}
+      {place.country || place.state ? row('state') : null}
+      {place.state ? row('city') : null}
+    </div>
+  );
+}
+
 export default function ExplorePage() {
   const router = useRouter();
   const {
@@ -45,15 +195,35 @@ export default function ExplorePage() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [joiningId, setJoiningId] = useState<string | null>(null);
+  const [locations, setLocations] = useState<OrgLocation[]>([]);
+  const [place, setPlace] = useState<PlaceFilter>({});
+  const [near, setNear] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const next = await loadLocations();
+      if (!cancelled) setLocations(next);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const userOrgIds = new Set(
     userOrganizations.map((org) => org.organization_id.toString()),
   );
 
+  const placeActive = Object.values(place).some(Boolean);
+  const inPlace = placeActive ? orgIdsIn(locations, place) : null;
+
   const filteredOrganizations = (() => {
-    if (!searchQuery.trim()) return allOrganizations;
+    const byPlace = inPlace
+      ? allOrganizations.filter((org) => inPlace.has(org.id.toString()))
+      : allOrganizations;
+    if (!searchQuery.trim()) return byPlace;
     const query = norm(searchQuery);
-    return allOrganizations.filter(
+    return byPlace.filter(
       (org) =>
         matches(org.name, query) ||
         (org.business_name ? matches(org.business_name, query) : false),
@@ -229,6 +399,19 @@ export default function ExplorePage() {
           ) : null}
         </div>
 
+        {locations.length > 0 ? (
+          <PlaceChips
+            locations={locations}
+            place={place}
+            near={near}
+            onChange={(nextPlace, nextNear) => {
+              setPlace(nextPlace);
+              setNear(nextNear);
+            }}
+            t={t}
+          />
+        ) : null}
+
         <button
           type="button"
           className="pressable mx-4 mt-[14px] flex w-[calc(100%-32px)] items-center overflow-hidden rounded-[18px] p-[18px] text-left"
@@ -263,7 +446,13 @@ export default function ExplorePage() {
           ) : (
             <div className="mx-4 mt-5 flex flex-col items-center py-6">
               <p className="text-center text-[13.5px] text-slate">
-                {t(searchQuery ? 'explore.emptySearch' : 'explore.empty')}
+                {t(
+                  searchQuery
+                    ? 'explore.emptySearch'
+                    : placeActive
+                      ? 'explore.emptyPlace'
+                      : 'explore.empty',
+                )}
               </p>
             </div>
           )

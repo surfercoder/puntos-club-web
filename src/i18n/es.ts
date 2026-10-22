@@ -273,6 +273,13 @@ export const es = {
   'explore.join': 'Unirse',
   'explore.emptySearch': 'No se encontraron organizaciones con ese nombre.',
   'explore.empty': 'No hay organizaciones disponibles.',
+  'explore.emptyPlace': 'No hay organizaciones en esa zona.',
+  'explore.placeFilter': 'Filtrar por ubicación',
+  'explore.near': 'Cerca de mí',
+  'explore.allPlaces': 'Todas',
+  'explore.nearDenied': 'Activá el permiso de ubicación para ver los clubes de tu provincia.',
+  'explore.nearNone': 'Todavía no hay clubes con la ubicación cargada.',
+  'explore.nearFailed': 'No pudimos obtener tu ubicación. Revisá que el GPS esté prendido.',
   'explore.helpTitle': '¿No encontrás tu organización?',
   'explore.helpBody': 'Pedí el código QR a la empresa\no institución para unirte.',
 

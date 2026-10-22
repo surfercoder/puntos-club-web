@@ -269,6 +269,13 @@ export const en: Record<keyof typeof es, string> = {
   'explore.join': 'Join',
   'explore.emptySearch': 'No organizations match that name.',
   'explore.empty': 'There are no organizations available.',
+  'explore.emptyPlace': 'There are no organizations in that area.',
+  'explore.placeFilter': 'Filter by location',
+  'explore.near': 'Near me',
+  'explore.allPlaces': 'All',
+  'explore.nearDenied': 'Allow location access to see the clubs in your province.',
+  'explore.nearNone': 'No clubs have a location set yet.',
+  'explore.nearFailed': "We couldn't get your location. Check that location services are on.",
   'explore.helpTitle': "Can't find your organization?",
   'explore.helpBody': 'Ask the company or institution\nfor its QR code to join.',
 

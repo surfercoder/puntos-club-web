@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { auth, membership, organization, resetAuth } from '../../_helpers/auth';
@@ -17,6 +17,11 @@ jest.mock('@/lib/notify', () => ({
   get notify() {
     return notify;
   },
+}));
+
+const rpc = jest.fn();
+jest.mock('@/lib/supabase/client', () => ({
+  supabase: { rpc: (...args: unknown[]) => rpc(...args) },
 }));
 
 import ExplorePage from '@/app/(app)/explore/page';
@@ -38,6 +43,7 @@ beforeEach(() => {
     ],
   });
   confirmMock.mockResolvedValue(true);
+  rpc.mockResolvedValue({ data: null, error: null });
 });
 
 describe('listado', () => {
@@ -226,5 +232,155 @@ describe('escanear', () => {
     );
     expect(router.push).toHaveBeenCalledTimes(2);
     expect(router.push).toHaveBeenCalledWith('/scan-organization');
+  });
+});
+
+describe('filtro de ubicacion', () => {
+  const place = (organization_id: number, overrides: Record<string, unknown> = {}) => ({
+    organization_id,
+    country: 'Argentina',
+    state: 'Mendoza',
+    city: 'Capital',
+    latitude: -32.89,
+    longitude: -68.83,
+    ...overrides,
+  });
+  const locs = [
+    place(1),
+    place(2, { city: 'Luján de Cuyo' }),
+    place(3, { state: 'Córdoba', city: 'Río Cuarto', latitude: -33.12, longitude: -64.35 }),
+  ];
+  const getCurrentPosition = jest.fn();
+  const chip = (name: string) => screen.getByRole('button', { name });
+  const shown = async () => {
+    show();
+    await screen.findByRole('button', { name: es('explore.near') });
+  };
+
+  beforeEach(() => {
+    resetAuth({
+      allOrganizations: [
+        organization({ id: '1', name: 'Mendo Capital' }),
+        organization({ id: '2', name: 'Mendo Lujan' }),
+        organization({ id: '3', name: 'Cordobes' }),
+        organization({ id: '4', name: 'Sin Sucursal' }),
+      ],
+    });
+    rpc.mockResolvedValue({ data: locs, error: null });
+    Object.defineProperty(navigator, 'geolocation', {
+      configurable: true,
+      value: { getCurrentPosition },
+    });
+  });
+
+  it('no aparece si la RPC devuelve error', async () => {
+    rpc.mockResolvedValue({ data: null, error: { message: 'x' } });
+    show();
+    await waitFor(() => expect(rpc).toHaveBeenCalled());
+    expect(screen.queryByRole('button', { name: es('explore.near') })).toBeNull();
+  });
+
+  it('no aparece si la RPC tira', async () => {
+    rpc.mockRejectedValue(new Error('offline'));
+    show();
+    await waitFor(() => expect(rpc).toHaveBeenCalled());
+    expect(screen.queryByRole('button', { name: es('explore.near') })).toBeNull();
+  });
+
+  it('descarta la respuesta si la pagina se desmonta antes', async () => {
+    let resolveRpc: (v: unknown) => void = () => {};
+    rpc.mockReturnValue(new Promise((r) => (resolveRpc = r)));
+    const { unmount } = show();
+    unmount();
+    await act(async () => resolveRpc({ data: locs, error: null }));
+  });
+
+  it('baja de pais a provincia a departamento y vuelve con Todas', async () => {
+    await shown();
+    expect(screen.queryByRole('button', { name: 'Mendoza' })).toBeNull();
+
+    await userEvent.click(chip('Argentina'));
+    expect(screen.queryByText('Sin Sucursal')).toBeNull();
+    await userEvent.click(chip('Córdoba'));
+    expect(screen.getByText('Cordobes')).toBeInTheDocument();
+    expect(screen.queryByText('Mendo Capital')).toBeNull();
+
+    await userEvent.click(chip('Mendoza'));
+    await userEvent.click(chip('Luján de Cuyo'));
+    expect(chip('Luján de Cuyo')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.queryByText('Mendo Capital')).toBeNull();
+
+    // Tocar el departamento elegido lo suelta.
+    await userEvent.click(chip('Luján de Cuyo'));
+    expect(screen.getByText('Mendo Capital')).toBeInTheDocument();
+
+    await userEvent.click(chip(es('explore.allPlaces')));
+    expect(screen.getByText('Sin Sucursal')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Mendoza' })).toBeNull();
+  });
+
+  it('una zona sin orgs lo dice; con busqueda manda el texto de busqueda', async () => {
+    auth.allOrganizations = [organization({ id: '3', name: 'Cordobes' })];
+    await shown();
+    await userEvent.click(chip('Argentina'));
+    await userEvent.click(chip('Mendoza'));
+    expect(screen.getByText(es('explore.emptyPlace'))).toBeInTheDocument();
+    await search('zzz');
+    expect(screen.getByText(es('explore.emptySearch'))).toBeInTheDocument();
+  });
+
+  it('cerca de mi elige la provincia de la sucursal mas cercana y se suelta', async () => {
+    let succeed: (p: unknown) => void = () => {};
+    getCurrentPosition.mockImplementation((ok) => (succeed = ok));
+    await shown();
+
+    await userEvent.click(chip(es('explore.near')));
+    // Mientras ubica, el chip muestra un spinner.
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    // ...y los chips quedan bloqueados para que el resultado no pise un toque manual.
+    expect(chip('Argentina')).toBeDisabled();
+    await act(async () => succeed({ coords: { latitude: -31.42, longitude: -64.18 } }));
+
+    expect(chip(es('explore.near'))).toHaveAttribute('aria-pressed', 'true');
+    expect(chip('Córdoba')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('Cordobes')).toBeInTheDocument();
+    expect(screen.queryByText('Mendo Capital')).toBeNull();
+
+    await userEvent.click(chip(es('explore.near')));
+    expect(screen.getByText('Mendo Capital')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Córdoba' })).toBeNull();
+
+    // Elegir algo a mano apaga "cerca de mi".
+    getCurrentPosition.mockImplementation((ok) =>
+      ok({ coords: { latitude: -32.9, longitude: -68.8 } }),
+    );
+    await userEvent.click(chip(es('explore.near')));
+    await userEvent.click(chip('Capital'));
+    expect(chip(es('explore.near'))).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('avisa si niegan el permiso o si falla la ubicacion', async () => {
+    await shown();
+    getCurrentPosition.mockImplementationOnce((_ok, fail) => fail({ code: 1 }));
+    await userEvent.click(chip(es('explore.near')));
+    expect(notify.error).toHaveBeenLastCalledWith(es('explore.near'), {
+      description: es('explore.nearDenied'),
+    });
+
+    getCurrentPosition.mockImplementationOnce((_ok, fail) => fail({ code: 3 }));
+    await userEvent.click(chip(es('explore.near')));
+    expect(notify.error).toHaveBeenLastCalledWith(es('explore.near'), {
+      description: es('explore.nearFailed'),
+    });
+  });
+
+  it('avisa cuando ninguna sucursal tiene coordenadas', async () => {
+    rpc.mockResolvedValue({ data: [place(1, { latitude: null, longitude: null })], error: null });
+    getCurrentPosition.mockImplementation((ok) => ok({ coords: { latitude: 0, longitude: 0 } }));
+    await shown();
+    await userEvent.click(chip(es('explore.near')));
+    expect(notify.error).toHaveBeenLastCalledWith(es('explore.near'), {
+      description: es('explore.nearNone'),
+    });
   });
 });
