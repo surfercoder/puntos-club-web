@@ -25,6 +25,9 @@ export async function loadOrganizationProducts(
       )
       .eq('organization_id', parseInt(organizationId))
       .gt('stock', 0)
+      // El orden lo elige el owner en el admin (arrastrando filas). Los que
+      // nunca se reordenaron tienen sort_order NULL y van al final, por puntos.
+      .order('sort_order', { ascending: true, nullsFirst: false })
       .order('required_points', { ascending: true });
 
     if (error || !data) {
