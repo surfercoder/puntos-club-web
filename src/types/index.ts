@@ -11,6 +11,8 @@ export type Organization = {
   industry?: string | null;
   logo_url?: string | null;
   brand_color?: string | null;
+  // Club para mayores de 18: antes de unirse se pregunta la edad.
+  adults_only?: boolean;
   creation_date: string;
 };
 

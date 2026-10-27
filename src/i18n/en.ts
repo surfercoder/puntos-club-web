@@ -282,6 +282,11 @@ export const en: Record<keyof typeof es, string> = {
   'join.confirmTitle': 'Join {name}',
   'join.confirmBody': 'Do you want to join {name} and start earning points?',
   'join.action': 'Join',
+  'join.adultsTitle': 'Are you over 18?',
+  'join.adultsBody':
+    '{name} is an adults-only club (18+). By tapping "Yes" you declare that you are of legal age.',
+  'join.adultsYes': 'Yes',
+  'join.adultsNo': 'No',
   'join.successTitle': 'All set!',
   'join.successBody': 'You joined {name}. You can start earning points now.',
   'join.viewOrganization': 'View organization',

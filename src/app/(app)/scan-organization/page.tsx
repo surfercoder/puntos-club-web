@@ -9,7 +9,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useT } from '@/contexts/I18nContext';
 import { confirm } from '@/lib/confirm';
 import { errorMessage } from '@/lib/errors';
+import { joinPrompt } from '@/lib/join-prompt';
 import { notify } from '@/lib/notify';
+import { supabase } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 
 // Esquina del marco de escaneo: cuatro de estas, rotadas por posicion.
@@ -50,11 +52,20 @@ export default function ScanOrganizationPage() {
     const organizationId = qrData.id.toString();
     const organizationName = qrData.name || t('scan.thisOrganization');
 
+    // El QR solo trae id y nombre: el flag de +18 se pide aparte. Si la
+    // consulta falla se muestra el confirm comun.
+    const { data: org } = await supabase
+      .from('organization')
+      .select('adults_only')
+      .eq('id', organizationId)
+      .maybeSingle();
+    const prompt = joinPrompt(t, organizationName, org?.adults_only);
+
     const ok = await confirm({
-      title: t('join.confirmTitle', { name: organizationName }),
-      message: t('join.confirmBody', { name: organizationName }),
-      confirmText: t('join.action'),
-      cancelText: t('common.cancel'),
+      title: prompt.title,
+      message: prompt.body,
+      confirmText: prompt.action,
+      cancelText: prompt.cancel,
     });
     if (!ok) {
       reset();

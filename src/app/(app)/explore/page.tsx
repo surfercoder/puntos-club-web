@@ -30,6 +30,7 @@ import {
   type PlaceFilter,
   type PlaceLevel,
 } from '@/lib/locations';
+import { joinPrompt } from '@/lib/join-prompt';
 import { notify } from '@/lib/notify';
 import { supabase } from '@/lib/supabase/client';
 import { colors, gradient, matches, norm } from '@/lib/theme';
@@ -231,11 +232,12 @@ export default function ExplorePage() {
   })();
 
   const handleJoinOrganization = async (org: Organization) => {
+    const prompt = joinPrompt(t, org.name, org.adults_only);
     const ok = await confirm({
-      title: t('join.confirmTitle', { name: org.name }),
-      message: t('join.confirmBody', { name: org.name }),
-      confirmText: t('join.action'),
-      cancelText: t('common.cancel'),
+      title: prompt.title,
+      message: prompt.body,
+      confirmText: prompt.action,
+      cancelText: prompt.cancel,
     });
     if (!ok) return;
 

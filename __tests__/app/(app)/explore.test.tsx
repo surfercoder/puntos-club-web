@@ -138,6 +138,21 @@ describe('sumarse a una organizacion', () => {
     });
   });
 
+  it('un club para mayores de 18 pregunta la edad', async () => {
+    resetAuth({ allOrganizations: [organization({ id: '8', name: 'Vinoteca', adults_only: true })] });
+    show();
+    await userEvent.click(screen.getByText(es('explore.join')));
+
+    await waitFor(() =>
+      expect(confirmMock).toHaveBeenCalledWith({
+        title: es('join.adultsTitle'),
+        message: es('join.adultsBody', { name: 'Vinoteca' }),
+        confirmText: es('join.adultsYes'),
+        cancelText: es('join.adultsNo'),
+      }),
+    );
+  });
+
   it('si cancela no se suma', async () => {
     confirmMock.mockResolvedValue(false);
     show();

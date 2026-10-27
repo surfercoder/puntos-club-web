@@ -31,6 +31,13 @@ jest.mock('@/components/QrCameraView', () => ({
   },
 }));
 
+const maybeSingle = jest.fn();
+jest.mock('@/lib/supabase/client', () => ({
+  supabase: {
+    from: () => ({ select: () => ({ eq: () => ({ maybeSingle: () => maybeSingle() }) }) }),
+  },
+}));
+
 import ScanOrganizationPage from '@/app/(app)/scan-organization/page';
 
 const show = () => renderApp(<ScanOrganizationPage />);
@@ -46,6 +53,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   resetAuth();
   confirmMock.mockResolvedValue(true);
+  maybeSingle.mockResolvedValue({ data: { adults_only: false }, error: null });
   permission = 'granted';
 });
 
@@ -62,6 +70,33 @@ describe('escaneo', () => {
     // En movil el alert ofrece "Ver organizacion"; en web el toast no tiene
     // botones, asi que se va directo al detalle.
     expect(router.replace).toHaveBeenCalledWith('/organization/9');
+  });
+
+  it('un club para mayores de 18 pregunta la edad', async () => {
+    maybeSingle.mockResolvedValue({ data: { adults_only: true }, error: null });
+    show();
+    await scan(orgQr);
+
+    await waitFor(() =>
+      expect(confirmMock).toHaveBeenCalledWith({
+        title: es('join.adultsTitle'),
+        message: es('join.adultsBody', { name: 'Cafe Lila' }),
+        confirmText: es('join.adultsYes'),
+        cancelText: es('join.adultsNo'),
+      }),
+    );
+  });
+
+  it('si no se puede leer el club usa el confirm comun', async () => {
+    maybeSingle.mockResolvedValue({ data: null, error: { message: 'nope' } });
+    show();
+    await scan(orgQr);
+
+    await waitFor(() =>
+      expect(confirmMock).toHaveBeenCalledWith(
+        expect.objectContaining({ title: es('join.confirmTitle', { name: 'Cafe Lila' }) }),
+      ),
+    );
   });
 
   it('sin nombre en el QR usa el generico', async () => {

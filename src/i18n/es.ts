@@ -287,6 +287,11 @@ export const es = {
   'join.confirmBody':
     '¿Querés unirte a {name} para empezar a acumular puntos?',
   'join.action': 'Unirse',
+  'join.adultsTitle': '¿Sos mayor de 18 años?',
+  'join.adultsBody':
+    '{name} es un club exclusivo para mayores de 18 años. Al tocar "Sí" declarás bajo tu responsabilidad que sos mayor de edad.',
+  'join.adultsYes': 'Sí',
+  'join.adultsNo': 'No',
   'join.successTitle': '¡Listo!',
   'join.successBody':
     'Te uniste a {name}. Ya podés empezar a acumular puntos.',
