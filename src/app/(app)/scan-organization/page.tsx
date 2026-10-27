@@ -53,13 +53,21 @@ export default function ScanOrganizationPage() {
     const organizationName = qrData.name || t('scan.thisOrganization');
 
     // El QR solo trae id y nombre: el flag de +18 se pide aparte. Si la
-    // consulta falla se muestra el confirm comun.
-    const { data: org } = await supabase
+    // consulta falla no se ofrece unirse: sin el flag no sabemos si hay que
+    // preguntar la edad.
+    const { data: org, error: orgError } = await supabase
       .from('organization')
       .select('adults_only')
       .eq('id', organizationId)
       .maybeSingle();
-    const prompt = joinPrompt(t, organizationName, org?.adults_only);
+    if (!org) {
+      reset();
+      notify.error(t('common.error'), {
+        description: orgError ? errorMessage(t, orgError) : t('scan.invalidQr'),
+      });
+      return;
+    }
+    const prompt = joinPrompt(t, organizationName, org.adults_only);
 
     const ok = await confirm({
       title: prompt.title,

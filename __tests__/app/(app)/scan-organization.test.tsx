@@ -87,16 +87,27 @@ describe('escaneo', () => {
     );
   });
 
-  it('si no se puede leer el club usa el confirm comun', async () => {
+  it('si no se puede leer el club no ofrece unirse y muestra el error', async () => {
     maybeSingle.mockResolvedValue({ data: null, error: { message: 'nope' } });
     show();
     await scan(orgQr);
 
+    await waitFor(() => expect(notify.error).toHaveBeenCalled());
+    expect(confirmMock).not.toHaveBeenCalled();
+    expect(auth.joinOrganization).not.toHaveBeenCalled();
+  });
+
+  it('si el club no existe avisa que el QR es invalido', async () => {
+    maybeSingle.mockResolvedValue({ data: null, error: null });
+    show();
+    await scan(orgQr);
+
     await waitFor(() =>
-      expect(confirmMock).toHaveBeenCalledWith(
-        expect.objectContaining({ title: es('join.confirmTitle', { name: 'Cafe Lila' }) }),
-      ),
+      expect(notify.error).toHaveBeenCalledWith(es('common.error'), {
+        description: es('scan.invalidQr'),
+      }),
     );
+    expect(confirmMock).not.toHaveBeenCalled();
   });
 
   it('sin nombre en el QR usa el generico', async () => {
