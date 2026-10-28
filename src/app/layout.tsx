@@ -10,7 +10,7 @@ import { LANG_COOKIE, readLangCookie } from '@/i18n/cookie';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'PuntosClub',
+  title: 'Puntos Club',
   description:
     'Sumá puntos en los comercios que elegís y canjealos por premios.',
 };

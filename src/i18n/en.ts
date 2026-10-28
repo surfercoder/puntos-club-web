@@ -140,7 +140,7 @@ export const en: Record<keyof typeof es, string> = {
 
   // --- Sign up -------------------------------------------------------------
   'signUp.header': 'Create Account',
-  'signUp.subtitle': 'Join PuntosClub and start enjoying\nall the rewards',
+  'signUp.subtitle': 'Join Puntos Club and start enjoying\nall the rewards',
   'signUp.firstName': 'First name *',
   'signUp.firstNamePlaceholder': 'John',
   'signUp.lastName': 'Last name *',
@@ -162,13 +162,13 @@ export const en: Record<keyof typeof es, string> = {
     'We protect your personal data and never share it with third parties.',
   'signUp.legalTitle': 'Before you continue',
   'signUp.legalText':
-    'To create your PuntosClub account you need to accept our Terms and Conditions and read our Privacy Policy.',
-  'signUp.acceptTerms': 'I accept the PuntosClub Terms and Conditions',
+    'To create your Puntos Club account you need to accept our Terms and Conditions and read our Privacy Policy.',
+  'signUp.acceptTerms': 'I accept the Puntos Club Terms and Conditions',
   'signUp.viewTerms': 'View Terms',
   'signUp.readPrivacy': 'I have read the Privacy Policy',
   'signUp.viewPrivacy': 'View Privacy Policy',
   'signUp.optional': 'Optional',
-  'signUp.marketing': 'I want to receive PuntosClub promotions and news',
+  'signUp.marketing': 'I want to receive Puntos Club promotions and news',
   'signUp.submit': 'Create Account',
   'signUp.haveAccount': 'Already have an account? ',
   'signUp.signInLink': 'Sign in',
@@ -439,7 +439,7 @@ export const en: Record<keyof typeof es, string> = {
 
   // --- General history (all organizations) ---------------------------------
   'historyAll.header': 'General history',
-  'historyAll.subtitle': 'All your activity on PuntosClub',
+  'historyAll.subtitle': 'All your activity on Puntos Club',
   'historyAll.assignedPoints': 'Points earned',
   'historyAll.cancelledPoints': 'Points cancelled',
   'historyAll.redemptionsDone': 'Redemptions',

@@ -41,7 +41,7 @@ describe('layout raiz', () => {
 
 describe('metadata', () => {
   it('declara el titulo de la app', () => {
-    expect(metadata.title).toBe('PuntosClub');
+    expect(metadata.title).toBe('Puntos Club');
   });
 
   // Casi todas las pantallas arrancan con el degrade morado a sangre.

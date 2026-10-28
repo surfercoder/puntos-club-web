@@ -4,8 +4,8 @@ import type { MetadataRoute } from 'next';
 // igual termina con un icono y una ventana sin barra de navegador.
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'PuntosClub',
-    short_name: 'PuntosClub',
+    name: 'Puntos Club',
+    short_name: 'Puntos Club',
     description:
       'Sumá puntos en los comercios que elegís y canjealos por premios.',
     start_url: '/',

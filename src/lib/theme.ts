@@ -19,7 +19,7 @@ export const colors = {
   purpleSoft: '#F5F1FF',
   purpleTint: '#F6F2FE',
 
-  pink: '#CD2B74',
+  pink: '#FF4573',
   pinkAccent: '#EC2E7B',
   pinkLine: '#F9CBDE',
 

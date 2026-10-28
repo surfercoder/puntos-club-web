@@ -29,6 +29,7 @@ export type AppNotification = {
 // Techo de filas por fuente. El panel es un vistazo de lo reciente, no el
 // historial: para eso ya esta /history, que pagina.
 const LIMIT = 40;
+const PRODUCTS_LIMIT = 500;
 
 // PostgREST devuelve el embed como objeto o como array segun infiera la
 // cardinalidad; ambas formas llegan en la misma consulta.
@@ -142,7 +143,10 @@ export async function loadNotifications(
         .select(`id, organization_id, creation_date, ${ORG_EMBED}`)
         .gt('stock', 0)
         .order('creation_date', { ascending: false })
-        .limit(LIMIT),
+        // Se agrupan por organizacion+dia DESPUES de traerlos: con LIMIT, una
+        // carga de 50 premios en un dia contaba 40 y se comia los dias previos.
+        // ponytail: tope fijo; agrupar en una RPC si alguna org pasa los 500.
+        .limit(PRODUCTS_LIMIT),
     ]);
 
   // Una fuente caida no es "no hay nada": si se tragara el error, el panel

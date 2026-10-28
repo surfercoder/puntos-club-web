@@ -87,7 +87,7 @@ describe('404', () => {
   it('ofrece volver a la home', () => {
     render(<NotFound />);
     expect(screen.getByText('404')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'PuntosClub' })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Puntos Club' })).toHaveAttribute(
       'href',
       '/',
     );

@@ -465,7 +465,7 @@ function ProfileForm({
         </button>
 
         <p className="mt-[18px] text-center text-[12px] text-subtle">
-          PuntosClub {APP_VERSION}
+          Puntos Club {APP_VERSION}
         </p>
       </form>
 

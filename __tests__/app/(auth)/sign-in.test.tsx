@@ -159,6 +159,6 @@ describe('olvide mi contrasena', () => {
 
 describe('pie', () => {
   it('muestra la version de la app', () => {
-    expect(screen.getByText(/PuntosClub/)).toBeInTheDocument();
+    expect(screen.getByText(/^Puntos Club (dev|\d)/)).toBeInTheDocument();
   });
 });

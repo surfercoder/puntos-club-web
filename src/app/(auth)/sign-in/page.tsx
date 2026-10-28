@@ -260,7 +260,7 @@ export default function SignInPage() {
         </div>
 
         <p className="mt-[18px] text-center text-[12px] text-subtle">
-          PuntosClub {APP_VERSION}
+          Puntos Club {APP_VERSION}
         </p>
       </form>
     </div>

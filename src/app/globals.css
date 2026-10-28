@@ -1,4 +1,9 @@
 @import "tailwindcss";
+@import "@fontsource/poppins/400.css";
+@import "@fontsource/poppins/500.css";
+@import "@fontsource/poppins/600.css";
+@import "@fontsource/poppins/700.css";
+@import "@fontsource/poppins/800.css";
 
 /* Paleta muestreada pixel a pixel de los mockups de beneficiario.
    Espejo exacto de PuntosClub/constants/theme.ts — si cambia uno, cambia el
@@ -20,7 +25,7 @@
   --color-purple-soft: #F5F1FF;
   --color-purple-tint: #F6F2FE;
 
-  --color-pink: #CD2B74;
+  --color-pink: #FF4573;
   --color-pink-accent: #EC2E7B;
   --color-pink-line: #F9CBDE;
 
@@ -53,9 +58,8 @@
   --color-slate-soft: #807FAA; /* subtitulos de filas */
   --color-navy: #1A1A5A;       /* titulos de filas */
 
-  /* React Native usa la fuente del sistema; la web la copia para que los
-     anchos de texto del mockup no se corran. */
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+  /* Poppins como las apps (components/Text.tsx) y el admin. */
+  --font-sans: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
 }
 

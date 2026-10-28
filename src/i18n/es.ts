@@ -141,7 +141,7 @@ export const es = {
   // --- Alta ----------------------------------------------------------------
   'signUp.header': 'Crear Cuenta',
   'signUp.subtitle':
-    'Únete a PuntosClub y empieza a disfrutar\nde todos los beneficios',
+    'Únete a Puntos Club y empieza a disfrutar\nde todos los beneficios',
   'signUp.firstName': 'Nombre *',
   'signUp.firstNamePlaceholder': 'Juan',
   'signUp.lastName': 'Apellido *',
@@ -163,13 +163,13 @@ export const es = {
     'Protegemos tus datos personales y nunca los compartimos con terceros.',
   'signUp.legalTitle': 'Antes de continuar',
   'signUp.legalText':
-    'Para crear tu cuenta PuntosClub necesitás aceptar nuestros Términos y Condiciones y conocer nuestra Política de Privacidad.',
-  'signUp.acceptTerms': 'Acepto los Términos y Condiciones de PuntosClub',
+    'Para crear tu cuenta Puntos Club necesitás aceptar nuestros Términos y Condiciones y conocer nuestra Política de Privacidad.',
+  'signUp.acceptTerms': 'Acepto los Términos y Condiciones de Puntos Club',
   'signUp.viewTerms': 'Ver Términos',
   'signUp.readPrivacy': 'He leído la Política de Privacidad',
   'signUp.viewPrivacy': 'Ver Política de Privacidad',
   'signUp.optional': 'Opcional',
-  'signUp.marketing': 'Quiero recibir promociones y novedades de PuntosClub',
+  'signUp.marketing': 'Quiero recibir promociones y novedades de Puntos Club',
   'signUp.submit': 'Crear Cuenta',
   'signUp.haveAccount': '¿Ya tienes una cuenta? ',
   'signUp.signInLink': 'Inicia Sesión',
@@ -447,7 +447,7 @@ export const es = {
 
   // --- Historial general (todas las organizaciones) ------------------------
   'historyAll.header': 'Historial general',
-  'historyAll.subtitle': 'Todas tus actividades en PuntosClub',
+  'historyAll.subtitle': 'Todas tus actividades en Puntos Club',
   'historyAll.assignedPoints': 'Puntos asignados',
   'historyAll.cancelledPoints': 'Puntos cancelados',
   'historyAll.redemptionsDone': 'Canjes realizados',
