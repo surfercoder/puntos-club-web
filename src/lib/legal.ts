@@ -198,7 +198,7 @@ El tratamiento de los datos personales se encuentra regulado por la Política de
 La Política de Privacidad explica qué información se recopila, para qué se utiliza, quién puede acceder, cómo se protege, cómo se conserva y cómo puede solicitarse su modificación o eliminación.
 ## 38. Legislación aplicable
 Estos Términos se regirán por las leyes de la República Argentina, sin perjuicio de los derechos y normas imperativas que resulten aplicables al Beneficiario.
-La jurisdicción específica será determinada en la versión definitiva de estos Términos conforme al domicilio legal de ADAMANTIO SAS y a las normas aplicables, especialmente aquellas relativas a relaciones de consumo.
+Serán competentes los tribunales ordinarios correspondientes al domicilio del Beneficiario, conforme a la Ley 24.240 de Defensa del Consumidor.
 ## 39. Vigencia
 Estos Términos entrarán en vigencia en la fecha indicada en la versión correspondiente.
 Cada versión deberá identificarse mediante número o denominación de versión, fecha de publicación y fecha de entrada en vigencia.
@@ -320,11 +320,9 @@ El Beneficiario no deberá incorporar voluntariamente este tipo de información 
 Actualmente Puntos Club no establece una restricción general de edad para crear cuentas.
 La fecha de nacimiento se solicita para determinar la edad cuando resulte necesario.
 El tratamiento de datos de niñas, niños y adolescentes deberá adecuarse a la normativa aplicable y será revisado antes de implementar funcionalidades específicas por edad.
-Este punto queda expresamente sujeto a revisión legal antes del lanzamiento.
 ## 34. Organizaciones
 Las Organizaciones reciben únicamente la información necesaria para administrar sus propios programas dentro de las funcionalidades habilitadas por Puntos Club.
 No podrán utilizar las herramientas para acceder a la base general de Beneficiarios.
-La determinación jurídica exacta del rol de cada Organización respecto del tratamiento de datos deberá ser validada antes de la publicación definitiva.
 ## 35. Terceros y proveedores
 Puntos Club se apoya en proveedores tecnológicos que tratan datos personales por su cuenta y conforme a sus instrucciones:
 - Supabase: infraestructura de base de datos, autenticación y almacenamiento, donde residen los datos de las cuentas y de los programas.
@@ -340,7 +338,6 @@ Esto implica una transferencia internacional de datos personales, realizada al s
 Al utilizar Puntos Club el Beneficiario queda informado de esta circunstancia. Ante cualquier consulta puede escribir a dpo@puntosclub.com.ar.
 ## 38. Registro de bases de datos
 Puntos Club evaluará las obligaciones aplicables a sus bases de datos personales y realizará las inscripciones o actualizaciones que correspondan ante el Registro Nacional de Bases de Datos Personales.
-Este punto deberá ser validado por el abogado antes del lanzamiento.
 ## 39. Incidentes de seguridad
 Ante un incidente que pueda comprometer datos personales, Puntos Club podrá adoptar medidas para contenerlo, investigar su alcance, proteger cuentas, mitigar riesgos, corregir vulnerabilidades y cumplir obligaciones legales.
 Las obligaciones de comunicación a titulares o autoridades serán determinadas conforme a la normativa aplicable y las circunstancias del incidente.
