@@ -10,7 +10,7 @@ const envSchema = z.object({
   // la variable mande un `undefined/auth/...` que Supabase rechaza.
   NEXT_PUBLIC_SITE_URL: z.preprocess(
     (v) => (v === '' ? undefined : v),
-    z.url().default('https://puntos-club-admin.vercel.app'),
+    z.url().default('https://www.puntosclub.com.ar'),
   ),
   // Opcional: sin ella el bloque de direccion cae al formulario manual, igual
   // que en la app movil cuando no hay key.

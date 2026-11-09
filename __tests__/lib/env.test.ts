@@ -18,9 +18,9 @@ const loadEnv = async (vars: Record<string, string | undefined>) => {
 describe('validacion del entorno', () => {
   it('acepta una url de admin valida', async () => {
     await expect(
-      loadEnv({ NEXT_PUBLIC_SITE_URL: 'https://admin.puntosclub.com.ar' }),
+      loadEnv({ NEXT_PUBLIC_SITE_URL: 'https://admin.example.com' }),
     ).resolves.toMatchObject({
-      NEXT_PUBLIC_SITE_URL: 'https://admin.puntosclub.com.ar',
+      NEXT_PUBLIC_SITE_URL: 'https://admin.example.com',
     });
   });
 
@@ -28,7 +28,7 @@ describe('validacion del entorno', () => {
   // el redirectTo de Supabase manda un link que no abre nada.
   it('la cadena vacia cae al admin de produccion, no falla por "no es una url"', async () => {
     await expect(loadEnv({ NEXT_PUBLIC_SITE_URL: '' })).resolves.toMatchObject({
-      NEXT_PUBLIC_SITE_URL: 'https://puntos-club-admin.vercel.app',
+      NEXT_PUBLIC_SITE_URL: 'https://www.puntosclub.com.ar',
     });
   });
 
@@ -36,7 +36,7 @@ describe('validacion del entorno', () => {
     await expect(
       loadEnv({ NEXT_PUBLIC_SITE_URL: undefined }),
     ).resolves.toMatchObject({
-      NEXT_PUBLIC_SITE_URL: 'https://puntos-club-admin.vercel.app',
+      NEXT_PUBLIC_SITE_URL: 'https://www.puntosclub.com.ar',
     });
   });
 
