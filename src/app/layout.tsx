@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { cookies } from 'next/headers';
 
+import InstallPrompt from '@/components/InstallPrompt';
 import { ConfirmHost } from '@/components/ui/confirm';
 import { NotifyHost } from '@/components/ui/notify';
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -13,6 +14,9 @@ export const metadata: Metadata = {
   title: 'Puntos Club',
   description:
     'Sumá puntos en los comercios que elegís y canjealos por premios.',
+  // iOS no lee el manifest para esto: sin el meta abre el acceso directo en
+  // Safari con barra de navegador en vez de pantalla completa.
+  appleWebApp: { capable: true, title: 'Puntos Club', statusBarStyle: 'default' },
 };
 
 export const viewport: Viewport = {
@@ -50,6 +54,7 @@ export default async function RootLayout({
             </div>
             <NotifyHost />
             <ConfirmHost />
+            <InstallPrompt />
           </AuthProvider>
         </I18nProvider>
       </body>
