@@ -184,7 +184,7 @@ describe('limpiar', () => {
     await clear();
 
     await waitFor(() => expect(markCleared).toHaveBeenCalledWith('7'));
-    expect(screen.getByText(es('notif.emptyTitle'))).toBeInTheDocument();
+    expect(await screen.findByText(es('notif.emptyTitle'))).toBeInTheDocument();
     expect(confirmMock).toHaveBeenCalledWith(
       expect.objectContaining({ destructive: true }),
     );
