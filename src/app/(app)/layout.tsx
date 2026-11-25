@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react';
 
 import { FullScreenSpinner } from '@/components/ui/spinner';
 import { useAuth } from '@/contexts/AuthContext';
+import { withOrgId } from '@/lib/org-qr';
 
 // El proxy ya corta a quien no tiene sesion. Aca se valida lo que el proxy no
 // puede: que ese usuario tenga una fila de `beneficiary` con rol final_user
@@ -31,10 +32,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     // rol no es final_user, AuthContext ya cerro la sesion.
     if (session && !beneficiary) {
       bouncing.current = true;
-      void signOutRef.current().finally(() => router.replace('/sign-in'));
+      void signOutRef.current().finally(() => router.replace(withOrgId('/sign-in')));
       return;
     }
-    if (!session) router.replace('/sign-in');
+    // withOrgId: un link /unirse sin sesion retoma el alta despues del login.
+    if (!session) router.replace(withOrgId('/sign-in'));
   }, [loading, session, beneficiary, router]);
 
   if (loading || !session || !beneficiary) {

@@ -25,6 +25,7 @@ import { env } from '@/lib/env';
 import { errorMessage } from '@/lib/errors';
 import { FORM_INPUT } from '@/lib/form';
 import { notify } from '@/lib/notify';
+import { homeAfterSignIn, withOrgId } from '@/lib/org-qr';
 import { supabase } from '@/lib/supabase/client';
 import { colors, gradient } from '@/lib/theme';
 import { cn } from '@/lib/utils';
@@ -88,8 +89,9 @@ export default function SignInPage() {
     }
 
     // replace y no push: volver atras despues de entrar tiene que dejar al
-    // usuario fuera de la app, no de vuelta en el formulario.
-    router.replace('/');
+    // usuario fuera de la app, no de vuelta en el formulario. Si llego por un
+    // link /unirse, se retoma ese alta.
+    router.replace(homeAfterSignIn());
   };
 
   // Sin pantalla propia de recuperacion: el mail abre /auth/update-password en
@@ -227,7 +229,7 @@ export default function SignInPage() {
             <button
               type="button"
               className="pressable ml-2 flex shrink-0 items-center"
-              onClick={() => router.push('/sign-up')}
+              onClick={() => router.push(withOrgId('/sign-up'))}
             >
               <span className="mr-[5px] text-[11px] font-bold text-violet">
                 {t('signIn.signUpLink')}

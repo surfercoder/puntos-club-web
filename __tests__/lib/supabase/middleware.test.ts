@@ -78,6 +78,31 @@ describe('guardia de sesion', () => {
     },
   );
 
+  it('el orgId de un link /unirse sobrevive al rebote al login', async () => {
+    signedOut();
+    const res = await updateSession(request('/scan-organization?orgId=9&x=1'));
+    expect(location(res)).toContain('/sign-in?orgId=9');
+    expect(location(res)).not.toContain('x=');
+  });
+
+  it('un orgId que no es numero no viaja', async () => {
+    signedOut();
+    const res = await updateSession(request('/scan-organization?orgId=abc'));
+    expect(location(res)).not.toContain('orgId');
+  });
+
+  it('con sesion, /sign-in con orgId va directo al alta', async () => {
+    signedIn();
+    const res = await updateSession(request('/sign-in?orgId=9'));
+    expect(location(res)).toContain('/scan-organization?orgId=9');
+  });
+
+  it('con sesion, /sign-in con un orgId que no es numero va a la home', async () => {
+    signedIn();
+    const res = await updateSession(request('/sign-in?orgId=abc'));
+    expect(location(res)).toBe('http://localhost:3003/');
+  });
+
   it('con sesion deja pasar', async () => {
     signedIn();
     const res = await updateSession(request('/history'));

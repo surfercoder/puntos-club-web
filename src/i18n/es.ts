@@ -309,6 +309,8 @@ export const es = {
   'scan.unreadableQr':
     'No pudimos leer el código QR. Asegurate de escanear un QR válido de organización.',
   'scan.thisOrganization': 'esta organización',
+  'scan.linkRetryBody': 'No pudimos completar el alta al club. Probá de nuevo.',
+  'scan.linkRetry': 'Reintentar',
 
   // --- Perfil --------------------------------------------------------------
   'profile.header': 'Mi Perfil',

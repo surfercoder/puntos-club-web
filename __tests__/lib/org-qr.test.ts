@@ -1,4 +1,4 @@
-import { parseOrgQr } from '@/lib/org-qr';
+import { homeAfterSignIn, linkOrgId, parseOrgQr, withOrgId } from '@/lib/org-qr';
 
 describe('parseOrgQr', () => {
   it.each([
@@ -18,4 +18,28 @@ describe('parseOrgQr', () => {
     'https://www.puntosclub.com.ar/planes',
     'null',
   ])('%s -> null', (data) => expect(parseOrgQr(data)).toBeNull());
+});
+
+describe('orgId de un link /unirse pendiente', () => {
+  it('solo acepta ids numericos', () => {
+    expect(linkOrgId('?orgId=9')).toBe('9');
+    expect(linkOrgId('?orgId=9x')).toBeNull();
+    expect(linkOrgId('')).toBeNull();
+  });
+
+  it('sin search explicito lee la URL actual', () => {
+    window.history.pushState({}, '', '/sign-in?orgId=4');
+    expect(withOrgId('/sign-up')).toBe('/sign-up?orgId=4');
+    window.history.pushState({}, '', '/');
+  });
+
+  it('lo agrega a la ruta solo si hay uno', () => {
+    expect(withOrgId('/sign-in', '?orgId=9')).toBe('/sign-in?orgId=9');
+    expect(withOrgId('/sign-in', '')).toBe('/sign-in');
+  });
+
+  it('despues del login retoma el alta o va a la home', () => {
+    expect(homeAfterSignIn('?orgId=9')).toBe('/scan-organization?orgId=9');
+    expect(homeAfterSignIn('')).toBe('/');
+  });
 });

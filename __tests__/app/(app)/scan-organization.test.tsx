@@ -1,6 +1,8 @@
 import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import { I18nProvider } from '@/contexts/I18nContext';
+
 import { auth, resetAuth } from '../../_helpers/auth';
 import { es, renderApp } from '../../_helpers/render';
 import { confirmMock, notify } from '../../_helpers/ui';
@@ -75,6 +77,73 @@ describe('escaneo', () => {
     show();
 
     await waitFor(() => expect(auth.joinOrganization).toHaveBeenCalledWith('9'));
+  });
+
+  it('por el link no pide la camara aunque este negada', async () => {
+    permission = 'denied';
+    searchParams = new URLSearchParams('orgId=9');
+    show();
+
+    await waitFor(() => expect(auth.joinOrganization).toHaveBeenCalledWith('9'));
+    expect(screen.queryByText(es('scan.permissionTitle'))).not.toBeInTheDocument();
+  });
+
+  it('si el alta por link falla ofrece reintentar y volver', async () => {
+    maybeSingle.mockResolvedValueOnce({ data: null, error: { message: 'nope' } });
+    searchParams = new URLSearchParams('orgId=9');
+    show();
+
+    // Reintenta y cancela la confirmacion: sigue ofreciendo reintentar.
+    confirmMock.mockResolvedValueOnce(false);
+    await userEvent.click(await screen.findByRole('button', { name: es('scan.linkRetry') }));
+    await userEvent.click(await screen.findByRole('button', { name: es('common.back') }));
+    expect(router.replace).toHaveBeenCalledWith('/');
+
+    await userEvent.click(screen.getByRole('button', { name: es('scan.linkRetry') }));
+    await waitFor(() => expect(auth.joinOrganization).toHaveBeenCalledWith('9'));
+  });
+
+  it('un link nuevo descarta el alta del anterior que sigue en vuelo', async () => {
+    let resolveFirst: (v: unknown) => void = () => {};
+    maybeSingle.mockImplementationOnce(() => new Promise((r) => (resolveFirst = r)));
+    searchParams = new URLSearchParams('orgId=9');
+    const { rerender } = show();
+
+    searchParams = new URLSearchParams('orgId=10');
+    rerender(
+      <I18nProvider initialLang="es">
+        <ScanOrganizationPage />
+      </I18nProvider>,
+    );
+    await waitFor(() => expect(auth.joinOrganization).toHaveBeenCalledWith('10'));
+
+    await act(async () => resolveFirst({ data: { name: 'Viejo', adults_only: false }, error: null }));
+    expect(confirmMock).toHaveBeenCalledTimes(1);
+    expect(auth.joinOrganization).not.toHaveBeenCalledWith('9');
+  });
+
+  it('si el link cambia con la confirmacion abierta no se suma ni navega', async () => {
+    let answer: (v: boolean) => void = () => {};
+    confirmMock.mockImplementationOnce(() => new Promise((r) => (answer = r)));
+    searchParams = new URLSearchParams('orgId=9');
+    const { unmount } = show();
+    await waitFor(() => expect(confirmMock).toHaveBeenCalled());
+
+    unmount();
+    await act(async () => answer(true));
+    expect(auth.joinOrganization).not.toHaveBeenCalled();
+  });
+
+  it('si se sale mientras se suma, no navega', async () => {
+    let done: (v: unknown) => void = () => {};
+    auth.joinOrganization.mockImplementationOnce(() => new Promise((r) => (done = r)));
+    searchParams = new URLSearchParams('orgId=9');
+    const { unmount } = show();
+    await waitFor(() => expect(auth.joinOrganization).toHaveBeenCalled());
+
+    unmount();
+    await act(async () => done({ error: null }));
+    expect(router.replace).not.toHaveBeenCalled();
   });
 
   it('suma la organizacion y va a su detalle', async () => {

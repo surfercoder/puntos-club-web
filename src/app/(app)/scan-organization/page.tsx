@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 
 import { useQrCamera } from '@/components/QrCameraView';
 import { Spinner } from '@/components/ui/spinner';
@@ -28,12 +28,32 @@ export default function ScanOrganizationPage() {
   );
 }
 
+// Por el link /unirse/<id> no hay nada que escanear: se va directo al alta sin
+// pedir la camara (si el usuario la negaba, quedaba la pantalla de permiso
+// encima del alta). Sin link, el escaner de siempre.
 function ScanOrganizationScreen() {
+  const orgId = useSearchParams().get('orgId');
+  // key: un link nuevo es otra alta, arranca de cero.
+  return orgId ? <JoinByLink key={orgId} orgId={orgId} /> : <CameraScanner />;
+}
+
+// Alta a la org a partir de lo que trae el QR (o el link): nombre y +18 de la
+// base, confirmacion y join. Compartido por el escaner y el link.
+function useJoinFlow(startLoading: boolean) {
   const router = useRouter();
   const { joinOrganization, refreshOrganizations } = useAuth();
   const t = useT();
   const [scanned, setScanned] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(startLoading);
+  // Un link nuevo (key) desmonta esta alta: lo que quede en vuelo no puede
+  // mostrar su confirmacion, unir ni navegar encima de la nueva.
+  const alive = useRef(true);
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  }, []);
 
   const reset = () => {
     setLoading(false);
@@ -60,6 +80,7 @@ function ScanOrganizationScreen() {
       .select('name, adults_only')
       .eq('id', organizationId)
       .maybeSingle();
+    if (!alive.current) return;
     if (!org) {
       reset();
       notify.error(t('common.error'), {
@@ -76,6 +97,7 @@ function ScanOrganizationScreen() {
       confirmText: prompt.action,
       cancelText: prompt.cancel,
     });
+    if (!alive.current) return;
     if (!ok) {
       reset();
       return;
@@ -96,17 +118,60 @@ function ScanOrganizationScreen() {
     // En movil el alert ofrece "Ver organizacion" o "Volver"; en web el toast
     // no tiene botones, asi que se va directo al detalle, que es lo que el
     // usuario acaba de pedir al escanear el QR del local.
-    router.replace(`/organization/${organizationId}`);
+    if (alive.current) router.replace(`/organization/${organizationId}`);
   };
 
-  // Llega por el link de la pagina /unirse/<id> del sitio: mismo alta, sin camara.
-  const orgId = useSearchParams().get('orgId');
+  return { handleScan, scanned, loading };
+}
+
+// Llega por el link de la pagina /unirse/<id> del sitio: mismo alta, sin camara.
+// Si la consulta falla o el usuario cancela, queda la opcion de reintentar.
+function JoinByLink({ orgId }: { orgId: string }) {
+  const router = useRouter();
+  const t = useT();
+  const { handleScan, loading } = useJoinFlow(true);
+  const join = () => handleScan(`/unirse/${orgId}`);
+
   useEffect(() => {
-    if (!orgId) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- una vez por link: es el flujo de escanear, no estado derivado
-    handleScan(`/unirse/${orgId}`);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- handleScan es nuevo en cada render; el alta corre una vez por orgId
-  }, [orgId]);
+    join();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- join es nuevo en cada render; el alta corre una vez por montaje (key = orgId)
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-dvh flex-1 items-center justify-center bg-[#F9FAFB]">
+        <Spinner size={36} color="#7C3AED" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex min-h-dvh flex-1 flex-col items-center justify-center bg-[#F9FAFB] p-5 text-center">
+      <p className="mb-6 text-[16px] text-[#6B7280]">{t('scan.linkRetryBody')}</p>
+      <button
+        type="button"
+        className="pressable mb-3 rounded-lg bg-[#7C3AED] px-8 py-[14px] text-[16px] font-semibold text-white"
+        onClick={join}
+      >
+        {t('scan.linkRetry')}
+      </button>
+      <button
+        type="button"
+        className="pressable px-8 py-[14px] text-[16px] text-[#6B7280]"
+        // replace y no back: se llega por link (o por el login con replace),
+        // sin historial propio al que volver.
+        onClick={() => router.replace('/')}
+      >
+        {t('common.back')}
+      </button>
+    </div>
+  );
+}
+
+function CameraScanner() {
+  const router = useRouter();
+  const t = useT();
+  const { handleScan, scanned, loading } = useJoinFlow(false);
 
   const { videoRef, permission, request } = useQrCamera({
     onScan: handleScan,

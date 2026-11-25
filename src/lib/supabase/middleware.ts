@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 import { env } from '@/lib/env';
+import { linkOrgId } from '@/lib/org-qr';
 import {
   LANG_COOKIE,
   LANG_COOKIE_MAX_AGE,
@@ -44,8 +45,11 @@ export async function updateSession(request: NextRequest) {
   // supabaseResponse, asi que un redirect que no las copie desloguea al cajero.
   const redirectTo = (pathname: string) => {
     const url = request.nextUrl.clone();
+    // El orgId de un link /unirse sobrevive al rebote al login (y del login con
+    // sesion al alta): es lo que permite retomarla al entrar.
+    const orgId = linkOrgId(request.nextUrl.search);
     url.pathname = pathname;
-    url.search = '';
+    url.search = orgId ? `?orgId=${orgId}` : '';
     const response = NextResponse.redirect(url);
     supabaseResponse.cookies
       .getAll()
@@ -73,7 +77,9 @@ export async function updateSession(request: NextRequest) {
   // beneficiary). Aca solo se corta lo barato: sin sesion no hay pantalla que
   // tenga sentido.
   if (!user && !isPublic) return redirectTo('/sign-in');
-  if (user && pathname === '/sign-in') return redirectTo('/');
+  if (user && pathname === '/sign-in') {
+    return redirectTo(linkOrgId(request.nextUrl.search) ? '/scan-organization' : '/');
+  }
 
   return supabaseResponse;
 }

@@ -27,6 +27,7 @@ import { errorMessage } from '@/lib/errors';
 import { FORM_INPUT, FORM_LABEL } from '@/lib/form';
 import { PRIVACY_VERSION, TERMS_VERSION } from '@/lib/legal';
 import { notify } from '@/lib/notify';
+import { withOrgId } from '@/lib/org-qr';
 import { colors, gradient } from '@/lib/theme';
 import { cn } from '@/lib/utils';
 
@@ -479,7 +480,7 @@ export default function SignUpPage() {
       notify.success(t('signUp.createdTitle'), {
         description: t('signUp.createdBody'),
       });
-      router.replace('/sign-in');
+      router.replace(withOrgId('/sign-in'));
     }
   };
 
@@ -567,7 +568,7 @@ export default function SignUpPage() {
           <button
             type="button"
             className="pressable text-[12.5px] font-bold text-violet"
-            onClick={() => router.replace('/sign-in')}
+            onClick={() => router.replace(withOrgId('/sign-in'))}
           >
             {t('signUp.signInLink')}
           </button>

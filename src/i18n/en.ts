@@ -302,6 +302,8 @@ export const en: Record<keyof typeof es, string> = {
   'scan.unreadableQr':
     "We couldn't read that QR code. Make sure it's a valid organization QR code.",
   'scan.thisOrganization': 'this organization',
+  'scan.linkRetryBody': "We couldn't finish joining the club. Please try again.",
+  'scan.linkRetry': 'Try again',
 
   // --- Profile -------------------------------------------------------------
   'profile.header': 'My Profile',
