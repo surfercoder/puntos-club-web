@@ -6,7 +6,11 @@ import { es, renderApp } from '../../_helpers/render';
 import { confirmMock, notify } from '../../_helpers/ui';
 
 const router = { push: jest.fn(), replace: jest.fn(), back: jest.fn() };
-jest.mock('next/navigation', () => ({ useRouter: () => router }));
+let searchParams = new URLSearchParams();
+jest.mock('next/navigation', () => ({
+  useRouter: () => router,
+  useSearchParams: () => searchParams,
+}));
 jest.mock('@/contexts/AuthContext', () => ({ useAuth: () => auth }));
 jest.mock('@/lib/confirm', () => ({
   get confirm() {
@@ -53,11 +57,26 @@ beforeEach(() => {
   jest.clearAllMocks();
   resetAuth();
   confirmMock.mockResolvedValue(true);
-  maybeSingle.mockResolvedValue({ data: { adults_only: false }, error: null });
+  maybeSingle.mockResolvedValue({ data: { name: 'Cafe Lila', adults_only: false }, error: null });
   permission = 'granted';
+  searchParams = new URLSearchParams();
 });
 
 describe('escaneo', () => {
+  it('acepta el link universal del QR nuevo', async () => {
+    show();
+    await scan('https://www.puntosclub.com.ar/unirse/9');
+
+    await waitFor(() => expect(auth.joinOrganization).toHaveBeenCalledWith('9'));
+  });
+
+  it('llegando por el link (?orgId=) arranca el alta sin escanear', async () => {
+    searchParams = new URLSearchParams('orgId=9');
+    show();
+
+    await waitFor(() => expect(auth.joinOrganization).toHaveBeenCalledWith('9'));
+  });
+
   it('suma la organizacion y va a su detalle', async () => {
     show();
     await scan(orgQr);
@@ -73,7 +92,7 @@ describe('escaneo', () => {
   });
 
   it('un club para mayores de 18 pregunta la edad', async () => {
-    maybeSingle.mockResolvedValue({ data: { adults_only: true }, error: null });
+    maybeSingle.mockResolvedValue({ data: { name: 'Cafe Lila', adults_only: true }, error: null });
     show();
     await scan(orgQr);
 
@@ -110,7 +129,8 @@ describe('escaneo', () => {
     expect(confirmMock).not.toHaveBeenCalled();
   });
 
-  it('sin nombre en el QR usa el generico', async () => {
+  it('sin nombre en la base usa el generico', async () => {
+    maybeSingle.mockResolvedValue({ data: { name: null, adults_only: false }, error: null });
     show();
     await scan({ type: 'organization', id: 9 });
 
@@ -128,7 +148,7 @@ describe('escaneo', () => {
     await scan('no es json');
 
     expect(notify.error).toHaveBeenCalledWith(es('common.error'), {
-      description: es('scan.unreadableQr'),
+      description: es('scan.invalidQr'),
     });
     expect(auth.joinOrganization).not.toHaveBeenCalled();
 

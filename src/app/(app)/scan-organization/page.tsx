@@ -1,7 +1,7 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import React, { Suspense, useEffect, useState } from 'react';
 
 import { useQrCamera } from '@/components/QrCameraView';
 import { Spinner } from '@/components/ui/spinner';
@@ -11,13 +11,24 @@ import { confirm } from '@/lib/confirm';
 import { errorMessage } from '@/lib/errors';
 import { joinPrompt } from '@/lib/join-prompt';
 import { notify } from '@/lib/notify';
+import { parseOrgQr } from '@/lib/org-qr';
 import { supabase } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 
 // Esquina del marco de escaneo: cuatro de estas, rotadas por posicion.
 const CORNER = 'absolute h-[30px] w-[30px] border-[4px] border-[#7C3AED]';
 
+// useSearchParams exige un Suspense arriba para que el build no deje la ruta
+// entera en render del cliente.
 export default function ScanOrganizationPage() {
+  return (
+    <Suspense>
+      <ScanOrganizationScreen />
+    </Suspense>
+  );
+}
+
+function ScanOrganizationScreen() {
   const router = useRouter();
   const { joinOrganization, refreshOrganizations } = useAuth();
   const t = useT();
@@ -34,30 +45,19 @@ export default function ScanOrganizationPage() {
     setScanned(true);
     setLoading(true);
 
-    let qrData: { type?: string; id?: string | number; name?: string };
-    try {
-      qrData = JSON.parse(data);
-    } catch {
-      reset();
-      notify.error(t('common.error'), { description: t('scan.unreadableQr') });
-      return;
-    }
-
-    if (qrData.type !== 'organization' || !qrData.id) {
+    const organizationId = parseOrgQr(data);
+    if (!organizationId) {
       reset();
       notify.error(t('common.error'), { description: t('scan.invalidQr') });
       return;
     }
 
-    const organizationId = qrData.id.toString();
-    const organizationName = qrData.name || t('scan.thisOrganization');
-
-    // El QR solo trae id y nombre: el flag de +18 se pide aparte. Si la
+    // El QR solo trae el id: nombre y flag de +18 salen de la base. Si la
     // consulta falla no se ofrece unirse: sin el flag no sabemos si hay que
     // preguntar la edad.
     const { data: org, error: orgError } = await supabase
       .from('organization')
-      .select('adults_only')
+      .select('name, adults_only')
       .eq('id', organizationId)
       .maybeSingle();
     if (!org) {
@@ -67,6 +67,7 @@ export default function ScanOrganizationPage() {
       });
       return;
     }
+    const organizationName = org.name || t('scan.thisOrganization');
     const prompt = joinPrompt(t, organizationName, org.adults_only);
 
     const ok = await confirm({
@@ -97,6 +98,15 @@ export default function ScanOrganizationPage() {
     // usuario acaba de pedir al escanear el QR del local.
     router.replace(`/organization/${organizationId}`);
   };
+
+  // Llega por el link de la pagina /unirse/<id> del sitio: mismo alta, sin camara.
+  const orgId = useSearchParams().get('orgId');
+  useEffect(() => {
+    if (!orgId) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- una vez por link: es el flujo de escanear, no estado derivado
+    handleScan(`/unirse/${orgId}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- handleScan es nuevo en cada render; el alta corre una vez por orgId
+  }, [orgId]);
 
   const { videoRef, permission, request } = useQrCamera({
     onScan: handleScan,
