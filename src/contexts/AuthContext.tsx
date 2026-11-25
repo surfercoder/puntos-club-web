@@ -371,7 +371,9 @@ async function loadUserOrganizations(
     `,
     )
     .eq('beneficiary_id', beneficiaryId)
-    .eq('is_active', true);
+    .eq('is_active', true)
+    // Igual que el handler de realtime: una membresia oculta no es "mi club".
+    .eq('is_hidden', false);
 
   if (error) return null;
   return (data || []) as BeneficiaryOrganization[];
@@ -410,21 +412,44 @@ async function loadAllOrganizations(
   }
 }
 
+// Cada carga de "mis clubes" saca un numero y al llegar pregunta si sigue
+// siendo la ultima: si no, se descarta. Si no, una respuesta lenta (refresh,
+// alta o realtime) pisa una lista mas nueva y un club recien unido desaparece
+// hasta el proximo refetch. Cambiar de beneficiario tambien avanza el numero.
+// `settled` es el ultimo numero que llego: si difiere de `issued`, hay una
+// carga en vuelo. Igual que en la app PuntosClub.
+type OrgsSeq = { issued: number; settled: number };
+
+function takeTicket(seq: OrgsSeq) {
+  const ticket = ++seq.issued;
+  return () => {
+    if (ticket !== seq.issued) return false;
+    seq.settled = ticket;
+    return true;
+  };
+}
+
 function useOrganizationsLoader(beneficiaryId: string | undefined) {
   const [state, dispatch] = useReducer(orgsReducer, initialOrgsState);
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const userOrgsSeq = useRef<OrgsSeq>({ issued: 0, settled: 0 });
+  const beneficiaryRef = useRef(beneficiaryId);
 
   useEffect(() => {
+    beneficiaryRef.current = beneficiaryId;
+    userOrgsSeq.current.issued++;
     if (!beneficiaryId) return;
 
     let cancelled = false;
 
     const fetchUserOrgs = async () => {
+      const isLatest = takeTicket(userOrgsSeq.current);
       const next = await loadUserOrganizations(beneficiaryId);
       const action: OrgsAction =
         next === null
           ? { type: 'user/error' }
           : { type: 'user/loaded', orgs: next };
+      if (!isLatest()) return;
       if (!cancelled) dispatch(action);
     };
 
@@ -448,6 +473,11 @@ function useOrganizationsLoader(beneficiaryId: string | undefined) {
       },
       async (payload) => {
         if (payload.eventType === 'UPDATE' && payload.new) {
+          // Una carga en vuelo pisaria el parche con datos viejos, y tirarla
+          // dejaria la lista incompleta: se reemplaza por una carga nueva, que
+          // ya ve esta fila.
+          const loadPending =
+            userOrgsSeq.current.settled !== userOrgsSeq.current.issued;
           const isNowHiddenOrInactive =
             payload.new.is_hidden || !payload.new.is_active;
           const wasHiddenOrInactive =
@@ -458,6 +488,7 @@ function useOrganizationsLoader(beneficiaryId: string | undefined) {
               type: 'user/replace',
               mapper: (prev) => prev.filter((org) => org.id !== payload.new.id),
             });
+            if (loadPending) await fetchUserOrgs();
             await fetchAllOrgs();
           } else if (wasHiddenOrInactive && !isNowHiddenOrInactive) {
             await fetchUserOrgs();
@@ -478,6 +509,7 @@ function useOrganizationsLoader(beneficiaryId: string | undefined) {
                     : org,
                 ),
             });
+            if (loadPending) await fetchUserOrgs();
           }
         } else {
           await fetchUserOrgs();
@@ -510,12 +542,22 @@ function useOrganizationsLoader(beneficiaryId: string | undefined) {
   }, [beneficiaryId]);
 
   const refreshOrganizations = async () => {
-    if (!beneficiaryId) return;
+    // Un refresh guardado de otro beneficiario no publica su lista.
+    if (!beneficiaryId || beneficiaryRef.current !== beneficiaryId) return;
+    const isLatest = takeTicket(userOrgsSeq.current);
     const [userOrgs, allOrgs] = await Promise.all([
       loadUserOrganizations(beneficiaryId),
       loadAllOrganizations(beneficiaryId),
     ]);
-    if (userOrgs !== null) dispatch({ type: 'user/loaded', orgs: userOrgs });
+    // Si esta era la ultima carga y fallo, se informa el error: la carga que
+    // invalido ya no va a publicar y el spinner quedaria colgado.
+    if (isLatest()) {
+      dispatch(
+        userOrgs === null
+          ? { type: 'user/error' }
+          : { type: 'user/loaded', orgs: userOrgs },
+      );
+    }
     if (allOrgs !== null) dispatch({ type: 'all/loaded', orgs: allOrgs });
   };
 
@@ -565,8 +607,20 @@ function useOrganizationsLoader(beneficiaryId: string | undefined) {
         }
       }
 
-      const refreshed = await loadUserOrganizations(beneficiaryId);
-      if (refreshed !== null) dispatch({ type: 'user/loaded', orgs: refreshed });
+      // Si mientras tanto cambio el beneficiario, la lista de este alta ya no
+      // es la que se muestra: ni se pide ni se publica.
+      if (beneficiaryRef.current === beneficiaryId) {
+        const isLatest = takeTicket(userOrgsSeq.current);
+        const refreshed = await loadUserOrganizations(beneficiaryId);
+        // Como en refreshOrganizations: si era la ultima y fallo, se informa.
+        if (isLatest()) {
+          dispatch(
+            refreshed === null
+              ? { type: 'user/error' }
+              : { type: 'user/loaded', orgs: refreshed },
+          );
+        }
+      }
       return { error: null };
     } catch (error) {
       return { error: mapped(error) };

@@ -118,13 +118,16 @@ describe('realtime antes de la primera lista', () => {
     const onRow = db.channel.on.mock.calls[0][2] as (
       payload: unknown,
     ) => Promise<void>;
-    await act(() =>
-      onRow({
+    // Con la carga inicial en vuelo, el handler pide una de reemplazo y la
+    // espera: se arranca sin esperarlo y se resuelve abajo.
+    let patched!: Promise<void>;
+    await act(async () => {
+      patched = onRow({
         eventType: 'UPDATE',
         old: { id: '1', is_hidden: false, is_active: true },
         new: { id: '1', available_points: 500, is_hidden: false, is_active: true },
-      }),
-    );
+      });
+    });
 
     // El mapper corre sobre una lista vacia: la fila todavia no existe, y el
     // fetch que sigue en vuelo la va a traer con los puntos nuevos.
@@ -132,6 +135,7 @@ describe('realtime antes de la primera lista', () => {
 
     await act(async () => {
       orgs$.resolve({ data: [], error: null });
+      await patched;
     });
   });
 });

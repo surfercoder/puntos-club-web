@@ -70,6 +70,15 @@ describe('carga de organizaciones', () => {
     expect(result.current.organizationsLoading).toBe(false);
   });
 
+  // El handler de realtime ya las saca: una recarga no puede devolverlas.
+  it('pide solo las membresias activas y no ocultas', async () => {
+    await start();
+    const eqs = db.client.from.mock.results
+      .map((r) => (r.value as { eq: jest.Mock }).eq)
+      .find((eq) => eq.mock.calls.some(([col]) => col === 'is_active'));
+    expect(eqs?.mock.calls).toContainEqual(['is_hidden', false]);
+  });
+
   // La organizacion que el beneficiario oculto no puede volver en Explorar.
   it('saca de Explorar las organizaciones ocultas', async () => {
     const result = await start({
@@ -421,6 +430,167 @@ describe('joinOrganization', () => {
 
     const { error } = await result.current.joinOrganization('9');
     expect(error?.message).toBe('error.noSession');
+  });
+});
+
+// Las consultas de "mis clubes" (eq is_active) quedan abiertas hasta que el
+// test las resuelve, en el orden que quiera; el resto sigue con el doble.
+const deferUserOrgQueries = () => {
+  // `null` hace fallar la consulta.
+  const pending: ((data: unknown[] | null) => void)[] = [];
+  db.client.from.mockImplementation((table: string) => {
+    const chain = realFrom(table) as Record<string, unknown>;
+    if (table !== 'beneficiary_organization') return chain;
+    let userOrgs = false;
+    const realEq = chain.eq as (...args: unknown[]) => unknown;
+    chain.eq = jest.fn((col: string, ...rest: unknown[]) => {
+      if (col === 'is_active') userOrgs = true;
+      realEq(col, ...rest);
+      return chain;
+    });
+    const realThen = chain.then as (cb: (r: unknown) => unknown) => Promise<unknown>;
+    chain.then = (cb: (r: unknown) => unknown) =>
+      userOrgs
+        ? new Promise<unknown[] | null>((r) => pending.push(r)).then((data) =>
+            cb(data === null ? { data, error: { message: 'boom' } } : { data, error: null }),
+          )
+        : realThen(cb);
+    return chain;
+  });
+  return pending;
+};
+
+// Mismo orden que la app PuntosClub: una respuesta lenta no pisa una mas nueva.
+describe('carreras de mis clubes', () => {
+  it('dos refresh que vuelven al reves: gana el ultimo en salir', async () => {
+    const result = await start();
+    await waitFor(() => expect(result.current.userOrganizations).toHaveLength(1));
+    const pending = deferUserOrgQueries();
+
+    let first!: Promise<void>;
+    let second!: Promise<void>;
+    await act(async () => {
+      first = result.current.refreshOrganizations();
+      second = result.current.refreshOrganizations();
+    });
+    await waitFor(() => expect(pending).toHaveLength(2));
+    await act(async () => {
+      pending[1]([membership({ id: 'nuevo' })]);
+      await second;
+      pending[0]([membership({ id: 'viejo' })]);
+      await first;
+    });
+
+    expect(result.current.userOrganizations.map((o) => o.id)).toEqual(['nuevo']);
+  });
+
+  it('un UPDATE por realtime no lo pisa una carga que ya estaba en vuelo', async () => {
+    const result = await start();
+    await waitFor(() => expect(result.current.userOrganizations).toHaveLength(1));
+    const pending = deferUserOrgQueries();
+
+    let refreshed!: Promise<void>;
+    await act(async () => {
+      refreshed = result.current.refreshOrganizations();
+    });
+    let patched!: Promise<void>;
+    await act(async () => {
+      patched = onChange(0)({
+        eventType: 'UPDATE',
+        old: { id: '1', is_hidden: false, is_active: true },
+        new: { ...membership({ available_points: 42 }), is_hidden: false },
+      });
+    });
+    // El parche no tira la carga en vuelo: la reemplaza por una nueva.
+    await waitFor(() => expect(pending).toHaveLength(2));
+    await act(async () => {
+      pending[1]([membership({ available_points: 42 }), membership({ id: '2' })]);
+      pending[0]([membership()]);
+      await refreshed;
+      await patched;
+    });
+
+    await waitFor(() =>
+      expect(result.current.userOrganizations.map((o) => o.id)).toEqual(['1', '2']),
+    );
+    expect(result.current.userOrganizations[0].available_points).toBe(42);
+  });
+
+  it('ocultar un club con una carga en vuelo tambien la reemplaza', async () => {
+    const result = await start();
+    await waitFor(() => expect(result.current.userOrganizations).toHaveLength(1));
+    const pending = deferUserOrgQueries();
+
+    let refreshed!: Promise<void>;
+    await act(async () => {
+      refreshed = result.current.refreshOrganizations();
+    });
+    let patched!: Promise<void>;
+    await act(async () => {
+      patched = onChange(0)({
+        eventType: 'UPDATE',
+        old: { id: '1', is_hidden: false, is_active: true },
+        new: { ...membership(), is_hidden: true },
+      });
+    });
+    await waitFor(() => expect(pending).toHaveLength(2));
+    await act(async () => {
+      pending[1]([]);
+      pending[0]([membership()]);
+      await refreshed;
+      await patched;
+    });
+
+    await waitFor(() => expect(result.current.userOrganizations).toEqual([]));
+  });
+
+  it('si la recarga del alta invalido la carga inicial y falla, deja de cargar', async () => {
+    const pending = deferUserOrgQueries();
+    auth().getSession.mockResolvedValue({ data: { session }, error: null } as never);
+    db.queueTable('beneficiary', { data: row, error: null });
+    db.queueTable('beneficiary_organization', { data: [], error: null }); // ocultas
+    db.queueTable('organization', { data: [], error: null });
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await waitFor(() => expect(pending).toHaveLength(1));
+
+    db.queueTable(
+      'beneficiary_organization',
+      { data: null, error: { code: 'PGRST116' } }, // no existia
+      { error: null }, // insert
+    );
+    let joined!: Promise<{ error: Error | null }>;
+    await act(async () => {
+      joined = result.current.joinOrganization('9');
+    });
+    await waitFor(() => expect(pending).toHaveLength(2));
+    await act(async () => {
+      pending[1](null);
+      await expect(joined).resolves.toEqual({ error: null });
+      pending[0]([membership()]);
+    });
+
+    await waitFor(() => expect(result.current.organizationsLoading).toBe(false));
+    expect(result.current.userOrganizations).toEqual([]);
+  });
+
+  it('si el refresh que invalido la carga inicial falla, deja de cargar', async () => {
+    const pending = deferUserOrgQueries();
+    const result = await start();
+    await waitFor(() => expect(pending).toHaveLength(1));
+
+    let refreshed!: Promise<void>;
+    await act(async () => {
+      refreshed = result.current.refreshOrganizations();
+    });
+    await waitFor(() => expect(pending).toHaveLength(2));
+    await act(async () => {
+      pending[1](null);
+      await refreshed;
+      pending[0]([membership()]);
+    });
+
+    await waitFor(() => expect(result.current.organizationsLoading).toBe(false));
+    expect(result.current.userOrganizations).toEqual([]);
   });
 });
 
